@@ -1,0 +1,5 @@
+font height:62
+image size: 512x1024
+Cell height: 64
+cell width: 53
+start character: 33

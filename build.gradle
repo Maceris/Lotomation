@@ -1,0 +1,28 @@
+tasks.register('copyPlugins', Copy) {
+	from subprojects.collect { it.tasks.withType(Jar) }
+	exclude '**/Ikala-Core-*.jar'
+	exclude '**/*-javadoc.jar'
+	exclude '**/*-sources.jar'
+    into 'plugins'
+}
+
+tasks.register('copyFramework', Copy) {
+	from subprojects.collect { it.tasks.withType(Jar) }
+	include '**/Ikala-Core-*.jar'
+	exclude '**/*-javadoc.jar'
+	exclude '**/*-sources.jar'
+    into '/'
+}
+
+tasks.register('build') {
+	dependsOn copyPlugins, copyFramework
+}
+
+tasks.register('clean', Delete) {
+    delete fileTree('/').matching {
+        include 'plugins/*.jar'
+		include 'Ikala-Core-*.jar'
+    }
+	delete 'logs'
+}
+
