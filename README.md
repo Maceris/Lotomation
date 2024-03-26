@@ -10,7 +10,11 @@ In order to build and run this game, some other repositories are going to be req
 * [Ikala-Core](https://github.com/Maceris/Ikala-Core)
 * [Ikala-Plugins](https://github.com/Maceris/Ikala-Plugins)
 
+If you wish to install these in another location, that location can be configured in gradle.properties.
+
 To build the program, run `./gradlew build`. This will build all the dependent projects and install the jars in the plugins folder.
+
+The `./gradlew clean` command will delete all the jars and the log folder, but leave plugin config, scripts, and data alone.
 
 ## Running
 
