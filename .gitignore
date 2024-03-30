@@ -9,6 +9,7 @@ Ikala-Core*.jar
 plugins/*.jar
 
 logs/
+*.log
 
 # IntelliJ
 out/
