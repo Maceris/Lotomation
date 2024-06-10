@@ -11,7 +11,7 @@ tasks.register('copyFramework', Copy) {
 	include '**/Ikala-Core-*.jar'
 	exclude '**/*-javadoc.jar'
 	exclude '**/*-sources.jar'
-    into '/'
+    into '.'
 }
 
 tasks.register('build') {
@@ -19,7 +19,7 @@ tasks.register('build') {
 }
 
 tasks.register('clean', Delete) {
-    delete fileTree('/').matching {
+    delete fileTree('.').matching {
         include 'plugins/*.jar'
 		include 'Ikala-Core-*.jar'
     }
