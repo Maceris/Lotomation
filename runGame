@@ -3,4 +3,4 @@
 #exec java -classpath "Ikala-Core-0.5.0.jar;./plugins/Ikala-Graphics-0.0.2.jar;./plugins/*.jar" com.ikalagaming.launcher.Launcher
 #-Dorg.lwjgl.util.DebugLoader=true -Dorg.lwjgl.util.Debug=true
 
-exec java -Dorg.lwjgl.librarypath="./plugins/Ikala-Graphics-0.0.2.jar" -jar Ikala-Core-0.6.0.jar
+exec java -XstartOnFirstThread -Dorg.lwjgl.librarypath="./plugins/Ikala-Graphics-0.0.2.jar" -jar Ikala-Core-0.6.0.jar
