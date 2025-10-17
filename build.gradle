@@ -12,6 +12,7 @@ tasks.register('copyFramework', Copy) {
 	exclude '**/*-javadoc.jar'
 	exclude '**/*-sources.jar'
     into '.'
+	doNotTrackState("We always want the latest jars")
 }
 
 tasks.register('build') {
