@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#-Dorg.lwjgl.util.DebugLoader=true -Dorg.lwjgl.util.Debug=true
+
+# Mac command
+# exec java -XstartOnFirstThread -Dorg.lwjgl.librarypath="./plugins/Ikala-Graphics-0.0.2.jar" -jar Ikala-Core-0.6.0.jar
+
+# Windows command
+exec java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -Dorg.lwjgl.librarypath="./plugins/Ikala-Graphics-0.0.2.jar" -jar Ikala-Core-0.6.0.jar
