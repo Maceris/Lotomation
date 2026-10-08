@@ -15,13 +15,22 @@ tasks.register('copyFramework', Copy) {
 	doNotTrackState("We always want the latest jars")
 }
 
+// The shared libraries that plugins need, which are loaded once and never unloaded. This replaces
+// everything in the folder, so that old versions of libraries don't stick around after upgrading.
+tasks.register('copyLibraries', Sync) {
+	from subprojects.collect { it.tasks.matching { task -> task.name == 'collectLibraries' } }
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	into 'libs'
+}
+
 tasks.register('build') {
-	dependsOn copyPlugins, copyFramework
+	dependsOn copyPlugins, copyFramework, copyLibraries
 }
 
 tasks.register('clean', Delete) {
     delete fileTree('.').matching {
         include 'plugins/*.jar'
+		include 'libs/*.jar'
 		include 'Ikala-Core-*.jar'
     }
 	delete 'logs'
