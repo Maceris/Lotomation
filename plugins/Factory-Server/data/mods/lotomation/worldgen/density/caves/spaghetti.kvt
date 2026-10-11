@@ -1,0 +1,8 @@
+/* Negative inside thin winding tunnels */
+{type:"mul", args:[N;
+  {type:"add", args:[N;
+    {type:"max", args:[N;
+      {type:"abs", arg:{type:"noise", noise:"lotomation:spaghetti"}},
+      {type:"abs", arg:{type:"noise", noise:"lotomation:spaghetti", salt:"lotomation:spaghetti_b"}}]},
+    {type:"constant", value:-0.06}]},
+  {type:"constant", value:40.0}]}

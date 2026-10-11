@@ -1,0 +1,5 @@
+/* Solid below the surface height, with overhangs: the surface comes entirely from data */
+{type:"add", args:[N;
+  {type:"ref", id:"lotomation:overworld/height"},
+  {type:"neg", arg:{type:"axis", axis:"y"}},
+  {type:"mul", args:[N;{type:"noise", noise:"lotomation:overhangs"}, {type:"constant", value:10.0}]}]}

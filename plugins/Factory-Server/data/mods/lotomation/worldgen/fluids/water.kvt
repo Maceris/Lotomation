@@ -1,0 +1,2 @@
+/* An ocean: open space below y = 0 fills with water */
+{type:"level", level:0.0, fluid:"lotomation:water"}

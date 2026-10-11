@@ -1,0 +1,4 @@
+/* Ore patches in the rock; anything else falls through to stone */
+{rules:[N;
+  {if:{type:"density", id:"lotomation:ores/iron", min:0.62}, then:{block:"lotomation:iron_patch"}},
+  {if:{type:"density", id:"lotomation:ores/coal", min:0.58}, then:{block:"lotomation:coal_patch"}}]}

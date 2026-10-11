@@ -1,0 +1,5 @@
+/* The overworld: the land with caves carved out */
+{type:"min", args:[N;
+  {type:"ref", id:"lotomation:overworld/base"},
+  {type:"ref", id:"lotomation:caves/spaghetti"},
+  {type:"ref", id:"lotomation:caves/caverns"}]}

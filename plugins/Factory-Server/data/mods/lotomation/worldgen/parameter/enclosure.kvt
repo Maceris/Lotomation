@@ -1,0 +1,3 @@
+/* How deep in rock a place is: a coarse average of the land before caves are carved,
+   which is roughly how far below the surface a place is, in blocks */
+{density:{type:"blur", radius:32.0, arg:"lotomation:overworld/base"}, display_range:[D;-100.0,100.0]}

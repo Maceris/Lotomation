@@ -1,0 +1,2 @@
+/* How worn down the land is: low erosion lets mountains rise */
+{type:"simplex", dimensions:2, wavelength:512.0, fractal:{mode:"fbm", octaves:4}}

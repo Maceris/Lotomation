@@ -1,0 +1,4 @@
+/* Bare rock on the peaks, a little dirt in the low hollows */
+{rules:[N;
+  {if:{type:"all", of:[N;{type:"air_above", max:2}, {type:"density", density:{type:"axis", axis:"y"}, max:40.0}]}, then:{block:"lotomation:dirt"}},
+  {then:{rules:"lotomation:ores"}}]}

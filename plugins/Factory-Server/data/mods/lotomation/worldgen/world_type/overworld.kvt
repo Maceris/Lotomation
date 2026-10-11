@@ -1,0 +1,8 @@
+{border:{min:[I;-30000000,-30000000,-30000000], max:[I;30000000,30000000,30000000], kill_distance:1024},
+ density:"lotomation:overworld/terrain",
+ interpolation:[I;4,8,4],
+ default_block:"lotomation:stone",
+ parameters:[T;"lotomation:temperature","lotomation:precipitation","lotomation:continentalness","lotomation:erosion","lotomation:weirdness","lotomation:enclosure"],
+ biomes:[T;"lotomation:ocean","lotomation:plains","lotomation:forest","lotomation:desert","lotomation:mountains","lotomation:deep_cavern"],
+ fallback_biome:"lotomation:plains",
+ fluids:"lotomation:water"}

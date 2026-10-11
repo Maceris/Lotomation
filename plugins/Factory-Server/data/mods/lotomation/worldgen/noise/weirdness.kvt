@@ -1,0 +1,2 @@
+/* How unusual a place is, for rare biomes later */
+{type:"simplex", dimensions:2, wavelength:768.0, fractal:{mode:"fbm", octaves:3}}

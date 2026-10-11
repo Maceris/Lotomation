@@ -1,0 +1,9 @@
+/* The surface height in blocks, from continentalness, plus mountains where erosion is low */
+{type:"add", args:[N;
+  {type:"spline", interp:"cubic", arg:{type:"parameter", id:"lotomation:continentalness"},
+   points:[N;{x:-1.0, y:-120.0}, {x:-0.3, y:-30.0}, {x:-0.1, y:-4.0}, {x:0.0, y:4.0}, {x:0.3, y:24.0}, {x:0.6, y:48.0}, {x:1.0, y:96.0}]},
+  {type:"mul", args:[N;
+    {type:"remap", from:[D;-1.0,1.0], to:[D;0.0,1.0], arg:{type:"noise", noise:"lotomation:mountains"}},
+    {type:"spline", arg:{type:"parameter", id:"lotomation:erosion"},
+     points:[N;{x:-1.0, y:140.0}, {x:-0.4, y:60.0}, {x:0.0, y:12.0}, {x:0.5, y:0.0}]},
+    {type:"range_mask", min:0.0, max:2.0, falloff:0.3, arg:{type:"parameter", id:"lotomation:continentalness"}}]}]}

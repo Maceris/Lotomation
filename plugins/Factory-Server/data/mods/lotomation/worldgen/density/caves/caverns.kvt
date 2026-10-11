@@ -1,0 +1,6 @@
+/* Negative inside big caverns, which only open below y = -40 */
+{type:"max", args:[N;
+  {type:"mul", args:[N;
+    {type:"add", args:[N;{type:"constant", value:0.45}, {type:"neg", arg:{type:"noise", noise:"lotomation:caverns"}}]},
+    {type:"constant", value:60.0}]},
+  {type:"step", threshold:-40.0, below:-1000.0, above:1000.0, arg:{type:"axis", axis:"y"}}]}

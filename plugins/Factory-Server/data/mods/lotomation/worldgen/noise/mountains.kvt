@@ -1,0 +1,2 @@
+/* Sharp ridgelines */
+{type:"simplex", dimensions:2, wavelength:256.0, fractal:{mode:"ridged", octaves:5}}

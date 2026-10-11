@@ -1,0 +1,5 @@
+{rules:[N;
+  {if:{type:"fluid", adjacent:true}, then:{block:"lotomation:sand"}},
+  {if:{type:"air_above", max:1}, then:{block:"lotomation:grass"}},
+  {if:{type:"air_above", max:4}, then:{block:"lotomation:dirt"}},
+  {then:{rules:"lotomation:ores"}}]}

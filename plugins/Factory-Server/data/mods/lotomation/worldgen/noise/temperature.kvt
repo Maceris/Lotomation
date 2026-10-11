@@ -1,0 +1,1 @@
+{type:"simplex", dimensions:2, wavelength:2048.0, fractal:{mode:"fbm", octaves:3}}

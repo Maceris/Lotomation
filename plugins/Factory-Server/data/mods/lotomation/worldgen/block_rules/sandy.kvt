@@ -1,0 +1,3 @@
+{rules:[N;
+  {if:{type:"any", of:[N;{type:"air_above", max:5}, {type:"fluid"}]}, then:{block:"lotomation:sand"}},
+  {then:{rules:"lotomation:ores"}}]}

@@ -1,0 +1,2 @@
+/* Where ore patches cluster */
+{type:"simplex", dimensions:3, wavelength:12.0, fractal:{mode:"fbm", octaves:2}}

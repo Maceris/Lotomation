@@ -1,0 +1,4 @@
+/* Iron clusters, only well below the surface */
+{type:"add", args:[N;
+  {type:"noise", noise:"lotomation:ore_clusters", salt:"lotomation:iron"},
+  {type:"step", threshold:-24.0, below:0.0, above:-10.0, arg:{type:"axis", axis:"y"}}]}

@@ -1,0 +1,2 @@
+/* Big open caverns deep down */
+{type:"simplex", dimensions:3, wavelength:[D;96.0,48.0,96.0], fractal:{mode:"fbm", octaves:3}}
