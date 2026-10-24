@@ -39,9 +39,70 @@ Terrain shape is a single function: `density(x, y, z) > 0` means solid, otherwis
 - **Parameters are named density functions defined in data**, 2D or 3D as the author chooses. They replace the fixed five-field `ParameterPack`, so mods can add their own.
 - **Biome selection** keeps the existing nearest-midpoint matching, extended to any number of named parameter ranges.
 - **One biome per 4×4×4 cell**, so 64 per chunk. Store them as palette indices or shorts, not `byte`, so the count isn't capped at 256.
-- **Terrain is shaped from the parameters, not from the chosen biome.** That avoids seams at biome borders. Biomes only choose blocks, features and decoration.
+- **Terrain is shaped from the parameters, not from the chosen biome.** That avoids seams at biome borders. Biomes only choose blocks, features and decoration. For very different terrain per region, see [Terrain Styles](#terrain-styles).
 - **Altitude effects are data**, for example `temperature = baseTemp(x,z) − 0.001·y`. Worlds that don't want them leave them out.
 - **Underground vs open-sky biomes without a surface:** a parameter can reference a smoothed, low-frequency copy of the terrain density (for example an `enclosure` parameter), meaning "mostly rock around here" vs "mostly open". The node graph has to be acyclic, so terrain can't depend on a parameter that depends on terrain. Check this when data loads.
+
+# Terrain Styles
+
+Built in Factory-Core (`world.gen.density.Styles`, tested by `TestTerrainStyles`). The goal is a wide range of biomes with very different terrain: flat plains and deserts, very tall mountains, deep thin chasms, fields of floating islands, regions of huge caverns or of tight tunnels.
+
+## The problem
+
+Biomes deliberately don't shape terrain (see above), so borders never show seams. All terrain comes from **one shared density function** driven by the parameters. Different styles of terrain are already possible this way: mountains are a ridged noise times `spline(erosion)`, so they only rise where erosion is low. But with many styles it breaks down:
+
+- **Every new style is an edit to the shared density.** A mod can't add a "floating islands" biome by adding files; it has to patch the world type's terrain tree, and two mods patching the same tree conflict.
+- **Biome and shape can disagree.** A biome is picked by nearest-midpoint over its climate ranges, and nothing ties those ranges to where the terrain actually has chasms or islands. A "sky meadow" biome can land on flat ground, and islands can float over plains blocks.
+- **The tree gets hard to read.** Ten styles nested in `lerp` and `range_mask` nodes is one huge file.
+- **Thin shapes get smeared.** Terrain is sampled on a 4 x 8 x 4 grid and interpolated, so a 2-block-wide chasm or a needle spire comes out blurry or vanishes.
+
+## The idea
+
+A **terrain style** is its own data file with two parts:
+
+- **`weight`**: a density function, clamped to 0..1, saying how strongly the style applies here. Usually built from parameters with `range_mask`, for example "erosion above 0.6 and weirdness below -0.3", or from its own low-frequency noise.
+- **`density`**: the terrain shape of that style.
+
+The world type's terrain combines every style it lists. For now the list is of IDs; listing by tag, so mods can add styles without patching the world type, comes with tag support in general.
+
+1. **Shape styles** replace the surface. The base terrain is their weighted average: `terrain = sum(w_i * s_i) / sum(w_i)`. Plains, desert, mountains, badlands, mesas. Where the weights add up to less than 1, the world type's fallback style fills the rest, so the total is never 0 and there is no sudden switch.
+2. **Overlay styles** add to or carve from the result, in priority order. Overlays with their own sampling grid (below) apply after the others, by priority among themselves. A **union** overlay (floating islands, spires, arches) fades from "no effect" at weight 0 to its full shape at weight 1. A **carve** overlay (chasms, sinkholes, cave networks) does the same with a hole.
+
+Because weights are smooth functions of continuous parameters, styles blend into each other instead of meeting at a seam. How wide the blend is comes from the `range_mask` falloff.
+
+## Biomes follow the styles
+
+Each style's weight is also available as a parameter, `style:<id>`, clamped to 0..1, so a biome can include it in its climate ranges. A world type only adds the parameter when one of its biomes asks for it, so worlds that don't use it pay nothing: a sky meadow biome asks for `style:lotomation:floating_islands` above 0.5. Selection stays nearest-midpoint, with one more dimension, and the biome now always sits on the terrain it was written for. Biomes are chosen per 4 x 4 x 4 cell, so the islands and the ground far below them can be different biomes.
+
+## Performance
+
+- **Styles that are absent cost almost nothing.** A style whose weight is 0 at a point is skipped there, and an overlay on its own grid whose weight bounds are 0 over a whole chunk is never evaluated in it. Because a weight of 0 means "no effect" at each point, skipping never changes a value, so neighboring chunks always agree.
+- **Weights are usually 2D**, so axis analysis caches them once per column.
+- **Overlays can pick their own sampling.** An overlay can set its own interpolation cell. The rest of the terrain is sampled on the world's grid and interpolated, then these overlays are applied at each block. A chasm overlay can sample at `[I;1,8,1]` (full resolution across, coarse down), so a 2-block chasm stays sharp, and that cost is only paid in chunks where chasms exist. Shape styles always use the world's grid.
+- **Bounds still work.** The weighted average of shapes is bounded by the lowest and highest of the shapes present, so the engine computes it without needing a general division node.
+
+## Rules
+
+- **No cycles.** A weight may use parameters and noise, but not anything that reads terrain. When data loads, a weight that reads any listed style's density, the fallback's, or the world type's own `density` is rejected, and a weight that reads its own `style:` parameter is a reference cycle.
+- **`enclosure` with styles**: `enclosure` blurs a density file, but styled terrain isn't a file, so with styles it can only blur an approximation (for example the main shape style). Cave styles should use depth or their own 3D noise instead.
+- **Overlay order is data**: each overlay has a `priority`, and ties are broken by ID, never by load order.
+- **Styles describe shape only.** Blocks, features and decoration still come from biomes.
+- **`density` or `styles`.** A world type that lists styles takes its terrain from them; a `density` field next to them is ignored, with a warning. World types without styles work exactly as before.
+
+## Examples
+
+| Style            | Kind    | Weight (where it applies)                         | Shape                                                                                |
+| ---------------- | ------- | ------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Plains           | shape   | Low weirdness, high erosion                       | Gentle spline of continentalness, small hills noise                                  |
+| Desert dunes     | shape   | Hot, dry, high erosion                            | Flat base plus `warp`ed `wave` dunes                                                 |
+| Mountains        | shape   | Low erosion                                       | Ridged simplex times a tall spline, peaks in the thousands of blocks                 |
+| Mesas            | shape   | Dry, mid erosion                                  | `quantize`d height term for terraces                                                 |
+| Chasms           | carve   | Rare regions, from its own low-frequency 2D noise  | Narrow slots where `abs(noise2d)` is near 0, deepened by a spline, sampled `[I;1,8,1]` |
+| Floating islands | union   | Its own low-frequency 2D noise, rare               | `islandNoise3D` masked to a height band with `range_mask` on y                        |
+| Great caverns    | carve   | 3D noise below a depth, large patches              | Cheese caves: big low-frequency 3D noise blobs                                       |
+| Tunnel warrens   | carve   | 3D noise below a depth, elsewhere                  | Spaghetti caves from the recipe in [Generation Data Format](Generation%20Data%20Format.md#recipes) |
+
+See [Generation Data Format: Terrain Styles](Generation%20Data%20Format.md#terrain-styles) for the file format.
 
 # Exposure Rules (replaces layers)
 
@@ -98,7 +159,7 @@ The engine has no sea level. Fluid filling is a node, aquifer-style:
 
 1. Parameters
 2. Biomes (3D cells)
-3. Terrain density (including noise caves and rivers)
+3. Terrain density: shape styles blended, then overlay styles (including noise caves, chasms and rivers)
 4. Fluids
 5. Exposure rules
 6. Structures (pulled)
@@ -121,6 +182,7 @@ Stages 1–5 are pure functions you can evaluate anywhere. Stages 6–8 use the 
 - `worldgen/density/`: density node trees
 - `worldgen/parameters/`: named parameters, each pointing to a density function
 - `worldgen/biome/`: parameter ranges, exposure rules, features per stage, decoration palette
+- `worldgen/terrain_style/`: a terrain shape and where it applies (see [Terrain Styles](#terrain-styles))
 - `worldgen/exposure_rules/`, `worldgen/fluids/`, `worldgen/feature/`, `worldgen/structure/`, `worldgen/structure_set/`, `loot/`
 - `worldgen/world_type/`: the root density function, parameter list, biome list, fluids, structure sets, spawn rule
 
@@ -188,5 +250,7 @@ The world type's generation decides everything inside the world border. Outside 
 # Open Questions
 
 - How expensive is the `enclosure` parameter, and does it need its own coarse grid?
+- Terrain styles: how many styles can overlap in one chunk before generation gets slow?
+- Terrain styles: should `enclosure` (and sky light) be able to blur the real styled terrain? That needs a way to reference the world type's combined terrain without a cycle.
 - 3D region files (`r.x.y.z.region`): how many chunks per side?
 - Rendering and physics near ±2 billion: keep positions as int plus float offset (as `Position` already does) and render relative to the camera.

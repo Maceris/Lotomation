@@ -34,6 +34,7 @@ Guiding rule: **the types are fixed in code, the configurations are data.** Ever
 | `worldgen/density/`        | Scalar fields `f(x,y,z) → double` | the node catalogue below                                     |
 | `worldgen/parameter/`      | Biome selection inputs            | one type (wraps a density)                                   |
 | `worldgen/biome/`          | Biomes                            | one type                                                     |
+| `worldgen/terrain_style/`  | Terrain shape + where it applies  | `shape`, `overlay`                                           |
 | `worldgen/block_rules/`    | Which block goes where            | rule and condition types                                     |
 | `worldgen/fluids/`         | Fluid filling                     | `none`, `level`, `aquifer`                                   |
 | `worldgen/feature/`        | Small placed things               | `blob`, `vein`, `column`, `scatter`, `template`, `tree`, ... |
@@ -224,6 +225,68 @@ Terraces: `quantize` with step `[I;1,6,1]` around the height term, or a staircas
 
 A named density function used to select biomes. A world type lists which parameters it uses, and biomes give ranges in the same units, which are the density output, usually [-1, 1]. `display_range` is only for debug views.
 
+# Terrain Styles
+
+The design is in [Cubic Chunk Generation: Terrain Styles](Cubic%20Chunk%20Generation.md#terrain-styles). A terrain style is one region's terrain shape plus where it applies, in its own file under `worldgen/terrain_style/`.
+
+```
+// worldgen/terrain_style/mountains.kvt
+{kind:"shape",
+ weight:{type:"range_mask", arg:{type:"parameter", id:"lotomation:erosion"}, min:-1.0, max:-0.3, falloff:0.2},
+ density:{type:"add", args:[N;
+   {type:"mul", args:[N;
+     {type:"noise", noise:"lotomation:mountains/ridged"},
+     {type:"spline", arg:{type:"parameter", id:"lotomation:erosion"},
+      points:[N;{x:-1.0,y:1800.0},{x:-0.3,y:200.0}]}]},
+   {type:"neg", arg:{type:"axis", axis:"y"}}]},
+ tags:[T;"lotomation:overworld_styles"]}
+
+// worldgen/terrain_style/chasms.kvt
+{kind:"overlay", op:"carve", priority:100,
+ weight:{type:"range_mask", arg:{type:"noise", noise:"lotomation:chasms/region"}, min:0.6, max:1.0, falloff:0.1},
+ density:"lotomation:chasms/slot",
+ interpolation:[I;1,8,1],
+ tags:[T;"lotomation:overworld_styles"]}
+
+// worldgen/terrain_style/floating_islands.kvt
+{kind:"overlay", op:"union", priority:50,
+ weight:{type:"range_mask", arg:{type:"noise", noise:"lotomation:islands/region"}, min:0.7, max:1.0, falloff:0.15},
+ density:{type:"mul", args:[N;
+   {type:"range_mask", arg:{type:"axis", axis:"y"}, min:250.0, max:550.0, falloff:50.0},
+   {type:"noise", noise:"lotomation:islands/shape"}]},
+ tags:[T;"lotomation:overworld_styles"]}
+```
+
+| Field           | Applies to | Meaning                                                                                                                        |
+| --------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `kind`          | all        | `shape` (part of the weighted average that makes the base surface) or `overlay` (applied on top of it)                          |
+| `weight`        | all        | A density, clamped to 0..1: how strongly the style applies. May use parameters and noise, never anything that reads terrain     |
+| `density`       | all        | The style's terrain, `> 0` = solid, like any density                                                                            |
+| `op`            | overlay    | `union` (adds solid, like islands) or `carve` (removes it, like chasms)                                                         |
+| `priority`      | overlay    | Overlays apply from low to high priority; ties are broken by ID                                                                 |
+| `interpolation` | overlay    | Optional sampling cell for this style's `density`. Such overlays apply after the others, at every block, so finer cells keep thin shapes sharp |
+| `tags`          | all        | Accepted but not used yet: world types list styles by ID until tags are supported                                               |
+
+How the engine combines them, with `w` the clamped weight and `s` the style's density:
+
+- **Shapes**: `base = (sum(w * s) + max(0, 1 - sum(w)) * f) / max(1, sum(w))`, where `f` is the world type's `fallback_style`. So where the shape weights add up to less than 1, the fallback fills the rest. Bounds are the lowest and highest bounds of the shapes (and fallback) that can contribute.
+- **Union overlay**: `terrain = max(terrain, lerp(w, -M, s))`. At weight 0 the overlay is `-M`, which never wins a `max`.
+- **Carve overlay**: `terrain = min(terrain, lerp(w, M, s))`, the same idea for holes.
+- `M` is the world type's `style_fade` (for example 64): how far out of range a faded-out overlay sits. A larger value fades it more sharply at the edge of its weight.
+- A style whose weight is 0 at a point has no effect there. Overlays with their own `interpolation` are skipped in any chunk where their weight bounds are `[0, 0]`.
+- Errors when data loads: a `kind` other than `shape` / `overlay`, an `op` other than `union` / `carve`, `op` / `priority` / `interpolation` on a shape, a fallback that is an overlay, and a weight that reads terrain (any listed style's density, the fallback's, or the world type's `density`).
+
+**Parameters from styles.** Every style's weight is also readable as the parameter `style:<id>`, both in density (`{type:"parameter", id:"style:lotomation:chasms"}`) and in biome climate ranges:
+
+```
+// worldgen/biome/sky_meadow.kvt
+{climate:{"style:lotomation:floating_islands":[D;0.5,1.0], temperature:[D;0.0,0.6]},
+ block_rules:"lotomation:grassy",
+ tags:[T;"lotomation:overworld_biomes"]}
+```
+
+The quotes around the key are needed because it contains a `:` (see [KVT](../User%20Data/KVT.md)). The weight is clamped to 0..1, and a world type only adds a `style:` parameter when one of its biomes names it.
+
 # Biomes
 
 ```
@@ -380,10 +443,15 @@ loot_groups:[N;
  parameters:[T;"lotomation:temperature","lotomation:precipitation","lotomation:continentalness","lotomation:erosion","lotomation:weirdness","lotomation:enclosure"],
  biomes:"#lotomation:overworld_biomes",
  fallback_biome:"lotomation:plains",
+ styles:[T;"lotomation:plains","lotomation:mountains","lotomation:chasms","lotomation:floating_islands"],
+ fallback_style:"lotomation:plains",
+ style_fade:64.0,
  fluids:"lotomation:overworld/fluids",
  structure_sets:"#lotomation:overworld_structures",
  spawn:{anchor:{type:"floor", min_air:3}, origin:[I;0,0,0], radius:4096}}
 ```
+
+With [terrain styles](#terrain-styles), `styles` lists them by ID (by tag once tags are supported), `fallback_style` fills in where the shape weights add up to less than 1, and `style_fade` (default 64) sets how far out of range a faded-out overlay sits. `density` is the whole terrain for world types that list no styles, and is ignored, with a warning, when they do.
 
 Debug tooling, including a viewer that renders any density, noise or parameter as a slice, is planned in [Generation Debug Tooling](Generation%20Debug%20Tooling.md): the Worldgen Lab is a plugin loaded into the asset editor, plus in-game commands and overlays.
 
@@ -391,3 +459,4 @@ Debug tooling, including a viewer that renders any density, noise or parameter a
 
 - Should `subdivision` support non-box room shapes later (L-shaped rooms, corridors)?
 - Should mods be able to register new condition and placement types from data, or only from code?
+- Terrain styles: should `style_fade` be per overlay instead of per world type?
