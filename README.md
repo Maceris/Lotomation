@@ -3,6 +3,8 @@
 Lotomation is a voxel-based factory game. The game code/configuration is released under an MIT license.
 The Ikala engine and plugins that are used to create it are also open source. Please see their corresponding repositories for more information.
 
+Binary files are not generally available as they are tracked through git LFS.
+
 ## Building
 
 In order to build and run this game, some other repositories are going to be required. It is expected that this repo be installed in the same directory as the following:
