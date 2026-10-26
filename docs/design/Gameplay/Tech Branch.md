@@ -119,24 +119,24 @@ How grades work (from [Types of Things Summary](../Types%20of%20Things/Types%20o
 
 Power as water flow. The order is intuitive without memorizing anything (a trickle is obviously less than a flood), and it escalates naturally into disaster words for the post-game.
 
-| Grade | Name | Code | Max power per machine (rough) | Era |
-|---|---|---|---|---|
-| G0 | **Drip** | DR | 32 W | T3 Steam (steam and mechanical power) |
-| G1 | **Trickle** | TR | 128 W | T4 Electric |
-| G2 | **Stream** | ST | 512 W | T5 Industrial |
-| G3 | **Current** | CU | 2 kW | T6 Heat |
-| G4 | **Rapids** | RA | 8 kW | T7 Precision |
-| G5 | **Surge** | SU | 33 kW | T8 Atomic |
-| G6 | **Torrent** | TO | 131 kW | T9 Information |
-| G7 | **Cascade** | CA | 524 kW | T10 Orbital |
-| G8 | **Flood** | FL | 2.1 MW | T11 Fusion |
-| G9 | **Deluge** | DE | 8.4 MW | C1 Exotic |
-| G10 | **Tempest** | TE | 34 MW | C2 Transmutation |
-| G11 | **Maelstrom** | MA | 134 MW | C3 Departure |
-| G12 | **Cataclysm** | CY | 537 MW | Post-game |
-| G13 | **Apocalypse** | AP | 2.1 GW | Post-game |
-| G14 | **Unreasonable** | UN | 8.6 GW | Post-game (a nod to GregTech's joke names) |
-| G15 | **Singularity** | SI | 34 GW | Post-game cap |
+| Grade | Name             | Code | Max power per machine (rough) | Era                                        |
+| ----- | ---------------- | ---- | ----------------------------- | ------------------------------------------ |
+| G0    | **Drip**         | DR   | 32 W                          | T3 Steam (steam and mechanical power)      |
+| G1    | **Trickle**      | TR   | 128 W                         | T4 Electric                                |
+| G2    | **Stream**       | ST   | 512 W                         | T5 Industrial                              |
+| G3    | **Current**      | CU   | 2 kW                          | T6 Heat                                    |
+| G4    | **Rapids**       | RA   | 8 kW                          | T7 Precision                               |
+| G5    | **Surge**        | SU   | 33 kW                         | T8 Atomic                                  |
+| G6    | **Torrent**      | TO   | 131 kW                        | T9 Information                             |
+| G7    | **Cascade**      | CA   | 524 kW                        | T10 Orbital                                |
+| G8    | **Flood**        | FL   | 2.1 MW                        | T11 Fusion                                 |
+| G9    | **Deluge**       | DE   | 8.4 MW                        | C1 Exotic                                  |
+| G10   | **Tempest**      | TE   | 34 MW                         | C2 Transmutation                           |
+| G11   | **Maelstrom**    | MA   | 134 MW                        | C3 Departure                               |
+| G12   | **Cataclysm**    | CY   | 537 MW                        | Post-game                                  |
+| G13   | **Apocalypse**   | AP   | 2.1 GW                        | Post-game                                  |
+| G14   | **Unreasonable** | UN   | 8.6 GW                        | Post-game (a nod to GregTech's joke names) |
+| G15   | **Singularity**  | SI   | 34 GW                         | Post-game cap                              |
 
 The watt values are placeholders that just follow the 4x rule from 32 W, and the real scale should come from balancing machines. Even G15 is far from the limit of a `long` in Joules per tick.
 

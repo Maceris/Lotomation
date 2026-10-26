@@ -220,19 +220,19 @@ Each of the 11 magic tiers introduces 4 of the 44 essences. The rules used:
 
 Why each tier gets what it gets:
 
-| Tier             | Essences                             | Why                                                                                                                   |
-| ---------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| 1 Folk Magic     | Fire, Water, Air, Earth              | The primals.                                                                                                          |
-| 2 Extraction     | Wood, Metal, Light, Dark             | The mystics. Metal arrives with the first metals.                                                                     |
-| 3 Runecraft      | Order, Chaos, Aether, Null           | The outers. Order sorts, Aether is the medium essences flow through, and automated magic makes its first waste, Null. |
-| 4 Magitech       | Steam, Lightning, Arcanum, Magnetism | Power on the magic side: Steam and Lightning turn essence into power, Arcanum carries it, magnets drive generators.   |
-| 5 Alchemy        | Balance, Rot, Binding, Life          | Byproducts (Balance or Rot), bulk multiblocks (Binding), potions (Life).                                              |
-| 6 Infusion       | Magma, Forge, Ice, Wrath             | Heat and cold for infusion, and Wrath as tempered edges: cutting tools and demolition.                                 |
-| 7 Warding        | Crystal, Salt, Umbral, Distortion    | Purity (Crystal), perfect output (Salt), hiding (Umbral) and disguise (Distortion): the four kinds of ward.           |
-| 8 Geomancy       | Prana, Gravity, Oblivion, Exchange   | Ley line taps (Prana), dense shielding (Gravity), decay (Oblivion), and Exchange, since fission transmutes elements.  |
-| 9 Spellcraft     | Lore, Gnosis, Mechanism, Synthesis   | Divination (Lore, Gnosis), clockwork logic (Mechanism), circuitry (Synthesis).                                        |
-| 10 Celestial     | Starlight, Hollow, Motion, Sulfur    | Starlight, the void above (Hollow), momentum for launches (Motion), and Sulfur, what burns, for the fuel.              |
-| 11 Summoning     | Ruin, Abyss, Vitality, Mercury       | A star's plasma (Ruin) and pressure (Abyss), life from nothing (Vitality), and Mercury, what binds.                   |
+| Tier         | Essences                             | Why                                                                                                                   |
+| ------------ | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 1 Folk Magic | Fire, Water, Air, Earth              | The primals.                                                                                                          |
+| 2 Extraction | Wood, Metal, Light, Dark             | The mystics. Metal arrives with the first metals.                                                                     |
+| 3 Runecraft  | Order, Chaos, Aether, Null           | The outers. Order sorts, Aether is the medium essences flow through, and automated magic makes its first waste, Null. |
+| 4 Magitech   | Steam, Lightning, Arcanum, Magnetism | Power on the magic side: Steam and Lightning turn essence into power, Arcanum carries it, magnets drive generators.   |
+| 5 Alchemy    | Balance, Rot, Binding, Life          | Byproducts (Balance or Rot), bulk multiblocks (Binding), potions (Life).                                              |
+| 6 Infusion   | Magma, Forge, Ice, Wrath             | Heat and cold for infusion, and Wrath as tempered edges: cutting tools and demolition.                                |
+| 7 Warding    | Crystal, Salt, Umbral, Distortion    | Purity (Crystal), perfect output (Salt), hiding (Umbral) and disguise (Distortion): the four kinds of ward.           |
+| 8 Geomancy   | Prana, Gravity, Oblivion, Exchange   | Ley line taps (Prana), dense shielding (Gravity), decay (Oblivion), and Exchange, since fission transmutes elements.  |
+| 9 Spellcraft | Lore, Gnosis, Mechanism, Synthesis   | Divination (Lore, Gnosis), clockwork logic (Mechanism), circuitry (Synthesis).                                        |
+| 10 Celestial | Starlight, Hollow, Motion, Sulfur    | Starlight, the void above (Hollow), momentum for launches (Motion), and Sulfur, what burns, for the fuel.             |
+| 11 Summoning | Ruin, Abyss, Vitality, Mercury       | A star's plasma (Ruin) and pressure (Abyss), life from nothing (Vitality), and Mercury, what binds.                   |
 
 The combined tiers introduce no essences; they use all 44. The Philosopher's Stone is made in Magnum Opus (C2); see [Combined tiers](Tiers.md#combined-tiers).
 
