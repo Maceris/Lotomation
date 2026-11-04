@@ -11,49 +11,18 @@ The aims are **engagement, variety, and parody**: we take the mechanics that pre
 Nothing here is decided. Each entry says what it is, where it comes from, how it could hook into the core gameplay, and what it connects to.
 
 ---
-
-# Guiding Ideas
-
-## The big trick: the factory pays for everything
-
-In a predatory game, the player's wallet feeds the slot machine. In Lotomation, **the factory** feeds it. Every currency, pull, reroll, speed-up, and upgrade material should be something the player can eventually **produce automatically**.
-
-That turns each dark pattern into a logistics problem:
-
-- Gacha pulls become "build a machine that pulls 600 times an hour, and sort the results on belts".
-- Duplicate protection becomes a recycling chain.
-- Grinding becomes something machines do while you watch.
-
-The more predatory the original mechanic, the funnier it is when a conveyor belt does it for you.
-## Guardrails from the Design Pillars
-
-| Pillar                              | What it means for these mechanics                                                                                                      |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Automate everything                 | Every random or timed mechanic should have an automated version by mid game. Hand-pulling is the tutorial, not the endgame.            |
-| All resources renewable             | Currencies come from production, not finite caches. Nothing limited-time is ever gone for good.                                        |
-| Freedom to build, decorate, destroy | Cosmetics, skins, and collectibles give decorating a purpose and a reward stream.                                                      |
-| Fun alone or with friends           | Every social mechanic must work solo (NPCs, drones, or self-gifting stand in for friends).                                             |
-| Don't destroy the player's stuff    | No upgrade that can break an item, no decay, no losing a collection. Failure only wastes the materials that were spent on the attempt. |
-| Compact factory                     | Rewards for density and efficiency, not for sprawling outward.                                                                         |
-
-## Dark patterns
+# Dark patterns
 
 | Pattern                    | Treatment                  | How                                                                                                                        |
 | -------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Playing by appointment     | Defang                     | Events and timed things exist, but nothing is lost by missing them. Events can be replayed any time from an archive.       |
 | Daily rewards              | Parody + defang            | The login calendar never resets, it just waits for you. See [Patient Login Calendar](#patient-login-calendar).             |
 | Grinding                   | Automate                   | The grind exists so a machine can do it.                                                                                   |
-| Advertisements             | Parody                     | In-universe joke ads, optional, see [In-Game Ads](#in-game-ads). Builds on *Funny Ads*.                                    |
 | Infinite treadmill         | Accept, opt-in             | Infinite research and prestige for people who want it. The story has a real ending (the ship launches).                    |
 | Wait to play               | Parody                     | Timers exist and the factory makes the skips. See [Timers and Skip Tokens](#timers-and-skip-tokens).                       |
-| Pay to skip                | Parody                     | Same as above.                                                                                                             |
-| Premium currency           | Parody                     | Confusing exchange rates as a running joke. See [Currencies](#currencies).                                                 |
-| Pay to win                 | Parody                     | Single-player "pay to win" with factory output is just progression. See [VIP Levels](#vip-levels).                         |
 | Artificial scarcity        | Parody                     | "LIMITED TIME!" offers whose countdown visibly resets. Never actually limited.                                             |
 | Recurring fee              | Parody                     | A "subscription" machine that eats a trickle of currency for a small passive perk.                                         |
 | Gambling / loot boxes      | Embrace                    | The core of the parody.                                                                                                    |
-| Power creep                | Accept                     | Natural to tiered tech. Old items get recycled into new ones, so nothing is worthless.                                     |
-| Waste aversion             | Parody + defang            | Leftover currency gets swept into a "Change Jar" that pays out later. Storage is never capped in a way that deletes items. |
 | Anchoring tricks           | Parody                     | Absurd items in the shop, like the 9,999,999 currency Golden Toilet.                                                       |
 | Social pyramid scheme      | Parody                     | "Refer a Robot", see [Refer a Robot](#refer-a-robot).                                                                      |
 | Social obligation / guilds | Defang                     | Shared goals that never punish absence.                                                                                    |
@@ -118,11 +87,6 @@ The backbone that most other mechanics plug into. Several fake currencies, in th
 - **Badge points**: from [Badges](#badges).
 - **Pachinko balls**: literal ball bearings, see [Pachinko Parlor](#pachinko-parlor).
 
-## Change Jar
-
-- **What**: Every shop leaves odd amounts of currency behind (you have 37, everything costs 50). Instead of guilting the player, leftovers trickle into a jar that eventually pays out a reward.
-- **Parody of**: Waste aversion.
-
 ---
 
 # Random Rewards
@@ -175,13 +139,6 @@ The backbone that most other mechanics plug into. Several fake currencies, in th
 - **Automation**: A **Lever Puller** module, or the slot machine accepts belt input and outputs winnings. Redstone-like logic (Factorio-style wires from [Types of Things Summary](../Types%20of%20Things/Types%20of%20Things%20Summary.md)) can read the result and react.
 - **Variants**: Themed slots per tech age, progressive jackpots that grow as the factory runs, a "near miss" mode as a joke.
 - **Connects to**: [Casino District](#casino-district), [Superstitions](#superstitions).
-
-## Pachinko Parlor
-
-- **What**: Pachinko, using **ball bearings the factory makes**. Balls are won and exchanged for prize tokens, which are exchanged for prizes at a "totally separate" counter (a parody of how real pachinko parlors work around gambling laws).
-- **Fit**: Ball bearings are a real factory product, so this is a sink for a production line. The physics board could be a fun little simulation.
-- **Connects to**: [Casino District](#casino-district).
-
 ## Sieving as a Loot Table
 
 - **What**: [Resource Gathering](../Prior%20Art/Resource%20Gathering.md) already suggests separating materials out of bulk matter with drop tables (Ex Nihilo sieves). Lean into the presentation: rare fractions get the gacha treatment, with a sparkle and a sound.
