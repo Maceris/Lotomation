@@ -5,5 +5,10 @@
 # Mac command
 # exec java -XstartOnFirstThread -jar Ikala-Core-0.6.0.jar
 
+# Short G1 pauses: the default 200 ms goal grows the young generation to gigabytes, and each pause
+# copying its survivors was a 15-35 ms hitch while a world streams. GCTimeRatio=4 lets the collector
+# spend more time rather than grow the heap to meet the goal (9 GB without it, 4.9 GB with it)
+GC_OPTS="-XX:MaxGCPauseMillis=8 -XX:GCTimeRatio=4"
+
 # Windows command
-exec java -jar Ikala-Core-0.6.0.jar
+exec java $GC_OPTS -jar Ikala-Core-0.6.0.jar
