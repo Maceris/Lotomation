@@ -11,7 +11,7 @@
 [FACT-12](5%20-%20Done/FACT-12.md) - Merge Gas and Liquid into Fluid
 [FACT-13](1%20-%20Backlog/FACT-13.md) - Joining remote servers
 [FACT-14](1%20-%20Backlog/FACT-14.md) - Options menu
-[FACT-15](1%20-%20Backlog/FACT-15.md) - Add New Game screen
+[FACT-15](5%20-%20Done/FACT-15.md) - Add New Game screen
 [FACT-16](5%20-%20Done/FACT-16.md) - Play functionality
 [FACT-17](1%20-%20Backlog/FACT-17.md) - Remove Entity IDs or change to numeric
 [FACT-18](5%20-%20Done/FACT-18.md) - Break up OpenGL buffers to per-mesh
