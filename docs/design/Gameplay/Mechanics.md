@@ -324,12 +324,6 @@ From Albion Online's Destiny Board and RuneScape skills.
 - **What**: Some things depend on time of day: night-blooming glow mushrooms (the Pern glow baskets in [Ideas](Ideas.md)), solar power, nocturnal pets.
 - **Fit**: Already natural to a voxel world. Gives power storage a reason (also in [Ideas](Ideas.md)).
 
-## Offline Progress
-
-- **What**: The factory keeps producing while the player is away, as rates rather than simulation ([Resource Gathering](../Prior%20Art/Resource%20Gathering.md) suggestion 9). Logging back in shows an idle-game "While you were away..." screen.
-- **Fit**: A natural fit with rate-simulated extractors, and a gentle parody of idle games.
-- **Connects to**: [Badges](#badges) (Day Job).
-
 ---
 
 # Activities
