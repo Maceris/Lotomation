@@ -67,3 +67,16 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# Nothing the game writes while running belongs in the install folder; these catch it if it does
+session.lock
+gui.ini
+last-version.txt
+# A portable install keeps its Home here
+/home/
+
+# Keys are never committed, except test keys
+*.key
+*.pem
+!test-data/**/*.key
+!test-data/**/*.pem

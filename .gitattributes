@@ -11,3 +11,5 @@
 *.jpg filter=lfs diff=lfs merge=lfs -text
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.dds filter=lfs diff=lfs merge=lfs -text
+# Shell scripts must keep LF line endings, or sh fails on the carriage returns
+bin/* text eol=lf

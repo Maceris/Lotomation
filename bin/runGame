@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Run from the install folder, the one above this script, so relative paths given to the game
+# (scripts, captures, data folders in config) mean the same thing wherever this is started from
+cd "$(dirname "$0")/.." || exit 1
+
+# The newest Ikala-Core jar, so the version isn't written here
+JAR=$(ls Ikala-Core-*.jar 2>/dev/null | sort -V | tail -n 1)
+if [ -z "$JAR" ]; then
+	echo "No Ikala-Core jar here; run ./gradlew build first" >&2
+	exit 1
+fi
+
+# Short G1 pauses: the default 200 ms goal grows the young generation to gigabytes, and each pause
+# copying its survivors was a 15-35 ms hitch while a world streams. GCTimeRatio=4 lets the collector
+# spend more time rather than grow the heap to meet the goal (9 GB without it, 4.9 GB with it)
+GC_OPTS="-XX:MaxGCPauseMillis=8 -XX:GCTimeRatio=4"
+
+# On macOS, GLFW needs the first thread: add -XstartOnFirstThread before -jar
+
+exec java $GC_OPTS "$@" -jar "$JAR"

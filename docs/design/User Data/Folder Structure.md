@@ -8,6 +8,10 @@ Where the game's files live: what ships, what each player's machine writes, and 
 
 **Core rule: the install folder is read-only while the game runs.** Anything the game writes goes into the Home folder or into an instance (save) folder. If something wants to be written next to the jars, it is in the wrong place.
 
+The one exception is authoring tools, such as the character editor or the particle viewer, which write content into folders the user picks, including the repository's data folders. That is their job, not runtime state.
+
+**Paths the game picks go in the Home or cache; paths a person gives are theirs.** A file the game decides on by itself, such as its logs, settings or GUI layout, goes in the Home. A path a person or script passes in, such as a script's `saveFrame("shots/front.png")` or `-Dikala.benchmark.gpuMemoryDump=dump.txt`, means what it says, relative to the working directory. The run scripts start the game from the install folder, so those keep meaning what they always did.
+
 # Three Roots
 
 | Root | What it is | Written while running? |
@@ -28,6 +32,7 @@ Lotomation/
   README.md, LICENSE                                                   tracked
   docs/                          tracked, except .obsidian/workspace*.json
   bin/                           tracked: runGame, runGameDebug, runServer
+  app.yml                        tracked: the game's name, which picks its Home and cache folders
   Ikala-Core-*.jar               ignored (built)
   libs/                          ignored (built / copied)
   plugins/
@@ -71,7 +76,7 @@ last-version.txt
 docs/.obsidian/workspace*.json
 ```
 
-`plugins/*/last-version.txt` is committed today. It is per-machine state written by the Ikala-Core launcher, so it moves to the Home (`state/plugin-versions.kvt`) and the committed copies are removed with `git rm --cached`.
+`plugins/*/last-version.txt` is committed today. It is per-machine state written by the Ikala-Core launcher, so it moves to the Home (`state/plugin-versions.yml`) and the committed copies are removed with `git rm --cached`.
 
 # Home
 
@@ -84,7 +89,7 @@ docs/.obsidian/workspace*.json
 | macOS | `~/Library/Application Support/Lotomation` | `~/Library/Caches/Lotomation` |
 
 - The cache is separate because it is large (the LOD cache alone is capped at 2 GiB) and must not be in Windows' roaming profile, which is copied between machines on some networks.
-- `-Dlotomation.home=<dir>` or `--home <dir>` moves the Home, and `-Dlotomation.cache=<dir>` moves the cache. Without a cache override, a moved Home keeps its cache in `<home>/cache`.
+- `-Dikala.home=<dir>` or `--home <dir>` moves the Home, and `-Dikala.cache=<dir>` or `--cache <dir>` moves the cache. Without a cache override, a moved Home keeps its cache in `<home>/cache`.
 - A `portable` marker file next to the Ikala-Core jar puts the Home in `<install>/home/`, for running from a USB stick or keeping one copy fully self-contained.
 - These locations are listed in the repository README.
 
@@ -95,7 +100,9 @@ docs/.obsidian/workspace*.json
   settings/
     client.kvt               graphics, controls, audio, resource pack order, last username per server
     gui.ini                  IkGui window layout
-    plugins/<Plugin>.yml     user overrides, layered over the shipped plugins/<Plugin>/config
+    plugins/<Plugin>/
+      config.yml             what the user changed, layered over the defaults
+      config.defaults.yml    every default with its comments, rewritten when they change; never read
   identity/
     identity.key             master secret (owner-only permissions, optional passphrase)
   servers.kvt                multiplayer list: name, address:port, pinned host key, last played
@@ -106,14 +113,16 @@ docs/.obsidian/workspace*.json
   screenshots/
   logs/                      client logs only
   crash-reports/
-  reports/                   benchmarks, gate output, profiling dumps
+  reports/                   benchmarks, gate output, profiling dumps, asset samples
+  worldgen-lab/              the Worldgen Lab's bookmarks, exports and corpora
   state/
-    plugin-versions.kvt      last loaded version of each plugin (replaces plugins/*/last-version.txt)
+    plugin-versions.yml      last loaded version of each plugin (replaces plugins/*/last-version.txt)
 ```
 
 - `servers.kvt` and `known_hosts.kvt` are text KVT so they can be edited by hand. See [Accounts and Identity](Accounts%20and%20Identity.md) for what goes in them.
 - Mods are kept per version because different servers can need different versions of the same mod. See [Mods](Mods.md#loading-on-connect).
-- Plugin config is layered: the shipped file under `plugins/<Plugin>/config/` holds defaults, and the Home copy holds only what the player changed. The game never writes the shipped file.
+- Plugin config is layered: the defaults in the plugin's jar, then the file shipped under `plugins/<Plugin>/config/`, then the Home copy, which holds only what the player changed. The game never writes the shipped file.
+- So players can see every setting, each config's defaults are written beside the Home copy as `config.defaults.yml`, comments and all, followed by any values the install ships. It is rewritten whenever the defaults change, so it never goes stale, and the game never reads it.
 
 # Instances
 
@@ -145,7 +154,17 @@ Development runs from the repository use the real Home, as a development version
 
 # Changes This Needs
 
-- **Ikala-Core:** a path resolver (install, Home, cache, logs, instance) that takes the game name from config and replaces `UserDataUtil`'s hard-coded `~/.lotomation`. Plugin config layered from install defaults and Home overrides. `last-version.txt` moved to the Home. Plugins loaded from several folders (install `plugins/`, Home `mods/`, instance `plugins/`), choosing a specific version when several are installed.
-- **Ikala-Graphics:** `lodCacheDirectory`, a new shader cache setting and `gui.ini` resolved from the Home and cache instead of the working directory.
-- **Factory:** saves and the server read and write the instance layout.
-- **Ikala-Asset-Editor** gets the same treatment, as its own application name with its own Home.
+Done (2026-11-21):
+
+- **Ikala-Core:** `AppPaths` resolves the install, Home, cache, log and instance folders, with `--home`, `--cache` and `--instance` (or `ikala.home`, `ikala.cache`, `ikala.instance`), the `portable` marker and `app.yml`. A `Bootstrap` entry point sets the log folder before anything logs. Plugins and libraries load from next to the jar, each plugin's shipped files are found next to its own jar, configs are layered with only the changes saved to `<home>/settings/plugins/<Plugin>/`, and the last plugin versions are in `<home>/state/plugin-versions.yml`. Each config's defaults are written beside it as `config.defaults.yml` for reference. Config files the old code had copied into the Asset Editor's and GamePlayground's install folders were moved into their Homes, keeping only what differed from the defaults. Dependencies can also give version bounds ([Mods](Mods.md#declaring-a-mod) needs these).
+- **Ikala-Graphics:** the LOD and shader caches have their own folders in the cache (`lod-cache-folder`, `shader-cache-folder`), the GUI layout is in `<home>/settings/gui.ini`, and IkGui's log file is in the log folder.
+- **Factory-Client:** saves are in `<home>/saves`, keys in `<home>/identity/identity.key`, and the Worldgen Lab writes to `<home>/worldgen-lab`.
+- **Asset-Converter:** asset samples go in `<home>/reports/asset-samples`.
+- **Lotomation, Ikala-Asset-Editor, GamePlayground:** `bin/` run scripts that start from the install folder and find the jar themselves, `bin/runServer`, `app.yml`, the `.gitignore` safety nets, and `last-version.txt` no longer tracked.
+
+Still to do:
+
+- **Factory-Core:** derived Ed25519 keys and host keys in place of the one RSA key pair ([Accounts and Identity](Accounts%20and%20Identity.md)).
+- **Factory-Server:** the instance's `server.kvt`, `host/`, `accounts.kvt` and `session.lock`. `bin/runServer` passes `--instance`, so its logs are already there, but every plugin still loads, just headless.
+- **Ikala-Core, for mods:** a "load after" ordering, unknown `plugin.yml` sections readable without loading classes, plugins loaded from several folders with a chosen version, and loading a set of plugins while running.
+- **Local scripts** that read `logs/latest.log` or `cache/lod` relative to a build root need the new folders.
