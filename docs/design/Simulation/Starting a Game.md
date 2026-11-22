@@ -71,7 +71,7 @@ Every message is a `Request`, as today, even on a local connection.
 # Steps
 
 1. Server world: open a save, compile the generator, `ServerWorld` with the generation pool and tick loop, spawn search with the fallback, spawn written to `world.kvt`. Done 2026-11-21: `Server.open`, `ServerWorld`, `SpawnRule` / `SpawnFinder` / `SpawnPlatform` in Factory-Core, and the spawn in `world.kvt` as `spawn` and `spawnPlatform`. Until changed chunks are saved, a fallback platform is stamped into its chunks each time they generate.
-2. Requests and chunk streaming: join, chunk data and unload by distance, player moves.
+2. Requests and chunk streaming: join, chunk data and unload by distance, player moves. Done 2026-11-21: `Join`, `Joined`, `ChunkData`, `ChunkUnload` and `PlayerMove`; `ChunkCodec` in Factory-Core encodes chunks in the save layout; `ServerSession` and `ServerPlayer` on the server, `ClientSession` and `ClientWorld` on the client. Requests a side receives run on its own thread: the server's tick thread, the client's main thread. The flying camera is the player's eye, and its position is sent every 100 ms when it moves. A new world's 2,601 chunks in view reach the client in about 5 seconds.
 3. Client drawing: the shared chunk-to-section code, colored cubes and water, sky and sun, the camera following a flying player.
 4. Block looks: look files and the first textures (see [Block Looks](../Rendering/Block%20Looks.md)).
 5. Far LOD.
@@ -81,5 +81,5 @@ Each step is checked headless with the `-Dikala.test.script` hook.
 
 # Open Questions
 
-- **View and generation radius:** how far the server keeps chunks around a player, and how that relates to the client's view distance and far LOD.
-- **Grace period:** how long a chunk no player needs stays loaded.
+- **View radius:** the server sends chunks 8 out sideways and 4 up and down from the player's chunk, and tells the client to drop them once they are more than a chunk past that. Whether these become settings, and how they relate to far LOD, is open.
+- **Grace period:** a chunk no player has been near for 30 seconds is dropped on the server. Whether that should depend on memory is open.
