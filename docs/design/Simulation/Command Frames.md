@@ -66,6 +66,7 @@ Rollback only works if the client and server compute exactly the same result fro
 # Client Prediction
 
 - **Two ring buffers** of 128 frames (about 2 s): the input for each frame, and the predicted state after each frame.
+- **Joining:** the client starts a few frames ahead of the server and predicts the frames before its first input with no input, as the server runs them. With gravity, no input isn't standing still.
 - **When a `PlayerState` for frame F arrives:**
   - If it is older than one already handled, it is ignored, since unreliable messages can arrive out of order.
   - If it equals the prediction for F, nothing changes. Frames up to F are confirmed.
@@ -79,7 +80,8 @@ Rollback only works if the client and server compute exactly the same result fro
 - **Movement reads blocks** through a view: the loaded world on the server, the received chunks on the client.
 - **Missing chunks are solid**, on both sides: chunks the server hasn't sent to this player yet, and chunks the client hasn't received. This keeps the two sides agreeing at the edge of the loaded area. A player at that edge stops instead of falling into the void.
 - **Block changes aren't predicted at first.** When a block changes, the client sees it when the server's change arrives, and any mispredict it causes is corrected the usual way. Placing and breaking blocks will later be predicted through the same frames.
-- **Collision is shared data, not looks.** Each block declares its collision in the block registry: `full` (the default for solid blocks) or `none` (tufts, fluids). Boxes on the 1/16 m grid come later, for slabs, posts and the like.
+- **Collision is shared data, not looks.** Each block declares its collision in the `collision` column of `blocks.csv`: `full` or `none` (tufts, fluids). A name the loader doesn't know is `full`, and so is a block the definitions don't name, so nothing unknown can be walked through. Boxes on the 1/16 m grid come later, for slabs, posts and the like.
+- **The client reads its own copy of the block definitions** for collision, the same data the server reads. When mods can differ between the two, the server sends its definitions when a player joins.
 
 # Movement
 
@@ -88,12 +90,13 @@ The first system. Its numbers are starting points to tune by feel.
 - **The player** is a 0.6 x 1.8 x 0.6 m box, with eyes at 1.62 m.
 - **Modes:**
   - **Walking:** the default.
-  - **Flying:** allowed by the server (for now, always), toggled by an input, for building and debugging. Level flight where the keys point, turned by the yaw, with jump and sneak rising and sinking straight up and down; 10 m/s, 40 m/s sprinting. It passes through everything.
+  - **Flying:** allowed by the server (for now, always), toggled with F, for building and debugging. The client holds a fly button in every input while flight is on, so a lost input can't drop the player out of the air. Level flight where the keys point, turned by the yaw, with jump and sneak rising and sinking straight up and down; 10 m/s, 40 m/s sprinting. It passes through everything.
 - **Walking:**
-  - accelerates toward where the keys point, relative to the yaw;
-  - 4.3 m/s walking and 5.6 m/s sprinting, with ground friction and weak control in the air;
-  - gravity of about 25 m/s^2, with a jump that clears 1.25 m.
-- **Collision:** the box sweeps through the blocks one axis at a time, y first, then x, then z. Landing sets the on-ground flag.
+  - accelerates toward where the keys point, relative to the yaw, closing a quarter of the gap to the wanted speed each frame on the ground and a thirty-second in the air;
+  - 4.3 m/s walking and 5.6 m/s sprinting;
+  - gravity of 25 m/s^2, falling at most 60 m/s, and a jump that starts at 8.3 m/s and rises a little over 1.3 m, so it clears one block but not two. Holding jump jumps again on landing.
+  - Leaving flight starts a fall from rest.
+- **Collision:** the box sweeps through the blocks one axis at a time, y first, then x, then z, and stops flush against the first solid block. Hitting something stops the speed along that axis; landing sets the on-ground flag. A box already inside a block isn't pushed out.
 - **Later:** stepping up small heights (slabs), sneaking at ledges, swimming, ladders.
 
 # Transport
@@ -135,8 +138,7 @@ The first system. Its numbers are starting points to tune by feel.
 
 # Steps
 
-1. **Walking:** collision data in the block registry, gravity, jumping, the world view and missing-chunks-are-solid, with the movement tests.
-2. **Other players:** interpolated remote players, now that a second client can join over UDP.
+1. **Other players:** interpolated remote players, now that a second client can join over UDP.
 
 # Open Questions
 
