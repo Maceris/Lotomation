@@ -368,16 +368,16 @@ Feature types:
 
 // tree_species: lotomation:oak
 {type:"broadleaf", trunk:"lotomation:oak_log", leaves:"lotomation:oak_leaves",
- height:[D;8.0,22.0], trunk_radius:[D;0.5,1.5], crown_radius:[D;4.0,9.0], branch_angle:[D;30.0,60.0]}
+ height:[D;7.0,16.0], crown_start:[D;0.3,0.5], crown_radius:[D;2.5,6.0], leaf_radius:[D;1.5,2.5]}
 
 // placed_feature: an oak forest
 {feature:{type:"tree", species:"lotomation:oak"},
  biomes:"#lotomation:forest_biomes",
  layer:"large",
  placement:[N;
-  {type:"cells", size:16, candidates:3, spacing:{min:5.0, max:12.0, by:"lotomation:vegetation/forest_density"}},
-  {type:"attach", to:"floor", search:24},
-  {type:"condition", if:{type:"below", blocks:[T;"#lotomation:soil"]}}]}
+  {type:"cells", size:[I;8,32,8], candidates:2, spacing:{min:4.0, max:9.0, by:{type:"noise", noise:"lotomation:forest_density"}}},
+  {type:"attach", to:"floor"},
+  {type:"condition", if:{type:"below", blocks:[T;"lotomation:grass","lotomation:dirt"]}}]}
 ```
 
 Placement modifiers:
@@ -385,7 +385,7 @@ Placement modifiers:
 | Modifier | Fields |
 | --- | --- |
 | `each_floor` | `chance`. Every floor cell rolls once; only for features that stay inside their cell |
-| `cells` | `size`, `candidates`, `spacing` (`min`, `max`, optionally `by` a density for where between them). Candidates per cell, thinned so none is within the spacing of a stronger one |
+| `cells` | `size` (`[I;x,y,z]`, or one number for x and z with a height of 32), `candidates`, `spacing` (`min`, `max`, optionally `by`: a density clamped to 0..1 that moves the spacing from `max` toward `min`). Each candidate stands on the first floor below it in its cell; candidates are thinned so none is within the spacing of a stronger one. For the large layer |
 | `chance` | `p` |
 | `attach` | `to`: `floor` / `ceiling` / `wall` / `inside_solid` / `in_air`, `search` (max blocks to scan) |
 | `axis_range` | `axis`, `min`, `max` |
@@ -394,7 +394,9 @@ Placement modifiers:
 - `layer` is `large` (trees, boulders) or `small` (single blocks, the default). Within a layer, lower priorities go first, then by ID; a position holds the first feature that lands in it.
 - Conditions on an `each_floor` position test the open position itself: `air_above` and `air_below` are 0 there, and `below` is the block under it. `below` takes block IDs; block tags come later.
 - Biome lists in placed features take IDs and `#tags`; a biome's tags are its `tags` list.
-- A feature's maximum extent is declared or derived; the layer uses the largest to decide how far around a chunk to look.
+- A feature's maximum extent is derived (for trees, from the species' largest height, crown and leaves); the layer uses it to decide how far around a chunk to look.
+- Tree species: `broadleaf` grows by space colonization, with `height` (blocks), `crown_start` (share of the height where the crown begins), `crown_radius` and `leaf_radius` (blocks), each a range every tree draws its own value from.
+- The large layer goes in before the small one; tree blocks only fill air, and logs also replace leaves. Small features only fill air that is left.
 
 # Structures
 

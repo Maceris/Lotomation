@@ -1,0 +1,7 @@
+/* A lone oak here and there on the plains */
+{feature:{type:"tree", species:"lotomation:oak"},
+ biomes:[T;"lotomation:plains"],
+ layer:"large",
+ placement:[N;
+  {type:"cells", size:[I;48,32,48], candidates:1, spacing:{min:24.0, max:24.0}},
+  {type:"condition", if:{type:"below", blocks:[T;"lotomation:grass"]}}]}

@@ -53,7 +53,8 @@ The chunk already knows which cells are solid, one block past its own edges incl
 
 # Forests
 
-- **Spacing without a grid.** Each cell holds a few candidates, and one survives only if no stronger candidate (by hash) is within its spacing distance. Only neighboring cells' candidates are needed, so every chunk agrees. This gives the even-but-random spacing of a real forest.
+- **Spacing without a grid.** Each cell holds a few candidates, each standing on the first floor below it in its cell, and they are thinned so none is within the spacing of a stronger one (by hash). One pass that drops every candidate with any stronger one near also drops those whose only rival was dropped itself, which leaves forests about three times too sparse, so thinning takes three passes: drop any with a stronger candidate near; bring back those with no stronger first-pass survivor near; drop any with a stronger second-pass survivor near, which keeps the spacing. Each pass reads only neighboring cells' previous pass, so every chunk agrees. This gives the even-but-random spacing of a real forest.
+- **The ground they stand on** is the terrain as block rules leave it, read from chunks generated to that stage and cached, so a tree's anchor and soil are exactly what its chunk generates.
 - **Density varies** with noise or parameters: dense groves, glades, scattered trees at a forest's edge.
 - **Species are data.** A species names a shape type from code (for example `broadleaf`, grown by space colonization, `conifer` or `palm`) and ranges for its parameters: height, trunk taper, branch angles, crown shape, leaf density, roots. Each tree draws its values from those ranges, seeded by its id and location, so no two oaks match.
 - **Spacing comes from the species**, such as trunk distance and crown radius. Trunks keep apart; crowns may overlap, as they do in real forests. Trees have no size limit beyond their layer's extent.
@@ -88,11 +89,10 @@ Runs after every layer has stamped the chunk, so it knows the chunk's finished b
 
 # Order of Work
 
-1. **Instances and layouts:** the instance, layout cache and footprint machinery, with procedural trees as the first user.
-2. **The final pass:** snow and ice with `sky_open`, once the fill channel exists.
-3. **Terrain edits and adapting structures,** with a village as the first user.
-4. **Networks:** sites, roads and cities that expand in levels.
-5. **Worldgen Lab:** show instances, footprints and edits, with a switch for each layer and placed feature, as each step lands.
+1. **The final pass:** snow and ice with `sky_open`, once the fill channel exists.
+2. **Terrain edits, footprints and adapting structures,** with a village as the first user; trees then avoid its footprint.
+3. **Networks:** sites, roads and cities that expand in levels.
+4. **Worldgen Lab:** show instances, footprints and edits, with a switch for each layer and placed feature, as each step lands.
 
 # Open Questions
 
@@ -102,3 +102,4 @@ Runs after every layer has stamped the chunk, so it knows the chunk's finished b
 - **Stages within a layer:** whether features need named stages (such as `ground`, `vegetation`, `decoration`) besides priority.
 - **Taller single plants:** two-block grass needs `each_floor` to see the top of the chunk below, a thin slab of extra terrain work.
 - **Branches thinner than a block** may want their own models; logs need an axis block state.
+- **More tree shapes:** `conifer` and `palm`, and trunk taper, branch angles and roots for `broadleaf`.

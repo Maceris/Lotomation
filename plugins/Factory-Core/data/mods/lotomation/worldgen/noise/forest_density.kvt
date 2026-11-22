@@ -1,0 +1,2 @@
+/* How thick forests grow: dense groves where high, open woods where low */
+{type:"simplex", dimensions:2, wavelength:96.0, fractal:{mode:"fbm", octaves:2}}

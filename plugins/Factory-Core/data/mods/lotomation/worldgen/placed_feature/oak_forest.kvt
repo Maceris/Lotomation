@@ -1,0 +1,8 @@
+/* Oak forest: trees 4 to 9 blocks apart, closer where the forest is dense */
+{feature:{type:"tree", species:"lotomation:oak"},
+ biomes:"#lotomation:forest_biomes",
+ layer:"large",
+ placement:[N;
+  {type:"cells", size:[I;8,32,8], candidates:2, spacing:{min:4.0, max:9.0, by:{type:"noise", noise:"lotomation:forest_density"}}},
+  {type:"attach", to:"floor"},
+  {type:"condition", if:{type:"below", blocks:[T;"lotomation:grass","lotomation:dirt"]}}]}
