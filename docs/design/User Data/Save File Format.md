@@ -145,6 +145,7 @@ A chunk in `regions/` is one KVT node:
 | `version` | Integer | The chunk format version. |
 | `palette` | Node Array | The distinct blocks in the chunk, each `{name:"lotomation:stairs", state:{facing:"north"}}`. `state` is left out when empty. |
 | `blocks` | Long Array | Palette indices, packed (see below). Left out when the palette has one entry, so open air or solid stone costs one palette entry. |
+| `fills` | Node | `{palette:[N;...], cells:[L;...]}`: what fills each position besides its block, such as a snow layer, packed like `blocks`. Each palette entry is `{name:"lotomation:snow", level:8}`; an empty fill is `{}`. Left out when nothing in the chunk has a fill (see [Fills](#fills)). |
 | `biomes` | Node | `{palette:[T;...], cells:[L;...]}`: one biome per 4x4x4 cell, 64 per chunk, packed the same way. `cells` is left out when there is one biome. |
 | `blockEntities` | Node Array | `{pos:<Short>, id:"<name>", data:{...}}` per block that has its own data. |
 | `ticks` | Node Array | Scheduled updates, `{pos:<Short>, kind:"<name>", due:<Long game tick>}`. |
@@ -163,7 +164,16 @@ A chunk in `regions/` is one KVT node:
 
 ### Fluids
 
-Fluids in the world, such as oceans and lakes, are blocks, as in Minecraft. A position holds either a fluid or another block. Fluids in pipes, tanks, machines and items (a full bucket) are separate data, kept by the factory network or the item. A waterlogged state, letting a block share its position with a fluid, can be added later without changing the format.
+Fluids in the world, such as oceans and lakes, are blocks, as in Minecraft. Fluids in pipes, tanks, machines and items (a full bucket) are separate data, kept by the factory network or the item.
+
+### Fills
+
+A position holds a block and, optionally, a **fill**: something that shares the position with the block, around it, such as snow lying around a fence post or a grass tuft. So a position is a fluid block, or another block with an optional fill.
+
+- **A fill has a level** in 1/16 m steps, up to 16 (a full position). Snow is the first fill; see [Snow](../Simulation/Snow.md).
+- **Which blocks take a fill** is a property of the block, set by a tag or derived from how much of the position its model fills. A full cube takes none.
+- **Water as a fill** (waterlogging, and water levels for Minecraft-like flow) is planned for the same channel but not decided: water may stay blocks with a level state.
+- A fill's level is game state: the server owns it and syncs it. How it is drawn is the client's (see [Snow](../Simulation/Snow.md#drawing)).
 
 ## Entity Contents
 

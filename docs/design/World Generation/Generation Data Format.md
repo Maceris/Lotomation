@@ -23,7 +23,7 @@ Guiding rule: **the types are fixed in code, the configurations are data.** Ever
 ## Mod merging
 
 - **Same ID replaces.** The later mod wins, and the mod load order is fixed and saved with the world.
-- **Most extension is additive, with no patching.** Placed features and structure sets say *which biomes* they appear in (`biomes:"#lotomation:has_copper"`), so a mod can add ores to an existing biome by adding one file. Biomes don't have to list everything.
+- **Most extension is additive, with no patching.** Placed features and structure sets say *which biomes* they appear in (`biomes:"#lotomation:forest_biomes"`), so a mod can add a tree or a flower to an existing biome by adding one file. Biomes don't have to list everything.
 - **Patch files for the rest:** `<id>.patch.kvt` with `add` / `remove` / `set` operations on lists and fields, for example to add a biome to an existing world type.
 
 # Directory Layout
@@ -37,10 +37,13 @@ Guiding rule: **the types are fixed in code, the configurations are data.** Ever
 | `worldgen/terrain_style/`  | Terrain shape + where it applies  | `shape`, `overlay`                                           |
 | `worldgen/block_rules/`    | Which block goes where            | rule and condition types                                     |
 | `worldgen/fluids/`         | Fluid filling                     | `none`, `level`, `aquifer`                                   |
-| `worldgen/feature/`        | Small placed things               | `blob`, `vein`, `column`, `scatter`, `template`, `tree`, ... |
+| `worldgen/feature/`        | Placed things, any size           | `block`, `tree`, `column`, `blob`, `scatter`, `template`, ... |
 | `worldgen/placed_feature/` | Feature + where/how often         | placement modifiers                                          |
-| `worldgen/structure/`      | Large placed things               | `template`, `jigsaw`                                         |
+| `worldgen/tree_species/`   | A kind of tree                    | shape types: `broadleaf`, `conifer`, `palm`, ...             |
+| `worldgen/structure/`      | Villages, ruins, buildings        | `template`, `jigsaw`                                         |
 | `worldgen/structure_set/`  | Structure grid placement          | one type                                                     |
+| `worldgen/network/`        | Settlement sites and their roads  | site, graph and route types                                  |
+| `worldgen/cover_rules/`    | The final pass: snow and ice      | rule and condition types, as block rules                     |
 | `worldgen/template/`       | Saved block arrangements          | none (raw data)                                              |
 | `worldgen/loot/`           | Container contents                | pool / entry types                                           |
 | `worldgen/world_type/`     | Ties it all together              | one type                                                     |
@@ -294,7 +297,7 @@ The quotes around the key are needed because it contains a `:` (see [KVT](../Use
  weight:1.0,
  block_rules:"lotomation:grassy",
  visual:{sky_light:1.0, ambient:[F;1.0,1.0,1.0], fog:"lotomation:clear"},
- tags:[T;"lotomation:overworld_biomes","lotomation:has_copper"]}
+ tags:[T;"lotomation:overworld_biomes","lotomation:forest_biomes"]}
 ```
 
 - `climate`: a range per parameter name. Parameters the biome leaves out match anything.
@@ -323,6 +326,8 @@ Condition types:
 | `biome` | `ids [T;...]` (tags allowed) |
 | `density` | `id` or inline, `min`, `max`. The general escape hatch: any density field can drive block choice |
 | `fluid` | `adjacent: true/false` |
+| `sky_open` | `distance` (how far up to check). See [Final Pass](Features%20and%20Structures.md#final-pass-snow-and-ice) |
+| `below` | `blocks [T;...]` (tags allowed): the block under the cell, as the terrain and block rules give it. For features |
 | `all`, `any`, `not` | `of [N;...]` |
 
 `then` can also be `{rules:"other_rule_file"}` to reuse rule sets.
@@ -335,53 +340,72 @@ Condition types:
 
 # Features
 
-A feature says what gets built. A placed feature says where and how often.
+A feature says what gets built; a placed feature says where and how often. How placement works, at any size and across chunk borders, is in [Features and Structures](Features%20and%20Structures.md).
 
 Feature types:
 
 | Type | Fields |
 | --- | --- |
-| `blob` | `block`, `size` range, `replace` (block tag) |
-| `vein` | `block`, `length`, `thickness`, `replace` |
+| `block` | `blocks` (weighted). One block in its own cell, for grass tufts and flowers |
+| `tree` | `species`, which gives its shape and ranges |
 | `column` | `block`, `height` range, `direction` (up / down), for spikes and stalactites |
-| `scatter` | `blocks` (weighted), `count`, `radius`, for grass and flowers |
+| `blob` | `block`, `size` range, `replace` (block tag), for boulders |
+| `scatter` | `feature`, `count`, `radius`: a small group of another feature |
 | `template` | `template`, `rotation`: `random` / `none` |
-| `tree` | `trunk`, `leaves`, `shape` (fixed shape types), `height` range |
-
-Every feature declares, or has derived, a `max_extent`, which can be at most 16 blocks.
 
 ```
-// placed_feature
-{feature:"lotomation:copper_blob",
- biomes:"#lotomation:has_copper",
- stage:"ores",
+// feature: lotomation:grass_tuft
+{type:"block", blocks:[N;{block:"lotomation:grass_tuft", weight:1}]}
+
+// placed_feature: tufts on grass, in patches
+{feature:"lotomation:grass_tuft",
+ biomes:"#lotomation:grassy_biomes",
+ layer:"small",
  placement:[N;
-  {type:"count", value:8},
-  {type:"in_chunk"},
-  {type:"attach", to:"inside_solid"},
-  {type:"condition", if:{type:"density", id:"lotomation:ore_zones/copper", min:0.2}}]}
+  {type:"each_floor", chance:0.3},
+  {type:"condition", if:{type:"below", blocks:[T;"lotomation:grass"]}},
+  {type:"condition", if:{type:"density", id:"lotomation:vegetation/meadows", min:0.2}}]}
+
+// tree_species: lotomation:oak
+{type:"broadleaf", trunk:"lotomation:oak_log", leaves:"lotomation:oak_leaves",
+ height:[D;8.0,22.0], trunk_radius:[D;0.5,1.5], crown_radius:[D;4.0,9.0], branch_angle:[D;30.0,60.0]}
+
+// placed_feature: an oak forest
+{feature:{type:"tree", species:"lotomation:oak"},
+ biomes:"#lotomation:forest_biomes",
+ layer:"large",
+ placement:[N;
+  {type:"cells", size:16, candidates:3, spacing:{min:5.0, max:12.0, by:"lotomation:vegetation/forest_density"}},
+  {type:"attach", to:"floor", search:24},
+  {type:"condition", if:{type:"below", blocks:[T;"#lotomation:soil"]}}]}
 ```
 
 Placement modifiers:
 
 | Modifier | Fields |
 | --- | --- |
-| `count` | `value` or a range |
+| `each_floor` | `chance`. Every floor cell rolls once; only for features that stay inside their cell |
+| `cells` | `size`, `candidates`, `spacing` (`min`, `max`, optionally `by` a density for where between them). Candidates per cell, thinned so none is within the spacing of a stronger one |
 | `chance` | `p` |
-| `in_chunk` | — (a random position in the chunk) |
 | `attach` | `to`: `floor` / `ceiling` / `wall` / `inside_solid` / `in_air`, `search` (max blocks to scan) |
 | `axis_range` | `axis`, `min`, `max` |
 | `condition` | any block-rule condition |
 
-Stages, in order: `ores`, `vegetation`, `decoration`. Within a stage the order is by priority, then by ID.
+- `layer` is `large` (trees, boulders) or `small` (single blocks). Within a layer, the order is by priority, then by ID.
+- A feature's maximum extent is declared or derived; the layer uses the largest to decide how far around a chunk to look.
 
 # Structures
 
 ```
 // structure
 {type:"jigsaw", start_pool:"lotomation:village/centers", max_depth:6, max_extent:[I;128,48,128],
- anchor:{type:"floor", min_air:8, flatness:{samples:9, max_delta:3}},
- adapt:"foundation"}
+ anchor:{type:"floor", min_air:8, terrain:{slope:[D;0.0,0.3], flatness:{samples:9, max_delta:3}}},
+ adapt:{foundation:{max_depth:6}, carve:{max_height:8}, budget:{cut:2000, fill:1500}, per_piece:true}}
+
+// structure: a village carved into a mountainside
+{type:"jigsaw", start_pool:"lotomation:cliff_village/centers", max_depth:5, max_extent:[I;96,64,96],
+ anchor:{type:"floor", min_air:6, terrain:{slope:[D;0.8,2.5], height_span:[I;16,64]}},
+ adapt:{carve:{max_height:12}, budget:{cut:6000, fill:500}, per_piece:true}}
 
 // structure_set
 {structures:[N;{id:"lotomation:village", weight:3},{id:"lotomation:ruin", weight:1}],
@@ -392,8 +416,41 @@ Stages, in order: `ores`, `vegetation`, `decoration`. Within a stage the order i
 
 - `spacing` 0 on an axis means one cell spans the whole world on that axis.
 - **Anchor types:** `floor`, `ceiling`, `cave`, `enclosed`, `open_air`, `fixed`.
-- **Terrain adaptation** (`adapt`): `none`, `bury`, `foundation` (fill below down to solid), `carve` (clear air around).
+- **Terrain requirements** (`anchor.terrain`): `slope` (rise over run, sampled over the footprint), `flatness`, `height_span`. A structure that wants steep ground won't generate on flat land, and the other way around.
+- **Adaptation** (`adapt`): `foundation` (fill below down to solid, at most `max_depth`), `carve` (clear air above, at most `max_height`), `pave`, and a `budget` of how many blocks it may cut and fill. A candidate over budget is rejected. `per_piece` adapts each jigsaw piece on its own, so villages terrace down hills.
 - **Templates:** plain KVT like every other worldgen file, so they stay human readable and can be edited and extended by hand. A template is a palette plus block data and per-block KVT. A container references a loot table instead of fixed contents.
+
+# Networks
+
+Settlement sites and the roads between them; see [Networks](Features%20and%20Structures.md#networks).
+
+```
+// network: lotomation:overworld/settlements
+{sites:{cell:[I;3072,0,3072], kinds:[N;
+   {structure:"lotomation:city", min_score:0.8},
+   {structure:"lotomation:town", min_score:0.5}],
+  score:"lotomation:settlement/score", spacing:1500.0},
+ roads:{graph:"relative_neighborhood", max_length:12000.0,
+  route:{step:32, slope_cost:4.0, water_cost:20.0, cut_cost:1.0, fill_cost:1.0},
+  bridge:{min_fill:12}, tunnel:{min_cut:16},
+  surface:"lotomation:highway"}}
+```
+
+- A site's score is a density, sampled coarsely; the best kind it qualifies for is placed there, or none.
+- `graph` is a local rule (`relative_neighborhood` first), so whether two sites connect depends only on sites near them.
+- `surface` names a road profile: width, layers, edges, lights.
+
+# Cover Rules
+
+The final pass, in the style of block rules but for the air cell on top of a surface: first match wins.
+
+```
+{rules:[N;
+  {if:{type:"all", of:[N;{type:"sky_open", distance:256},{type:"density", id:"lotomation:temperature", max:-0.3},{type:"fluid", adjacent:false}]},
+   then:{fill:"lotomation:snow", depth:8}},
+  {if:{type:"all", of:[N;{type:"sky_open", distance:256},{type:"density", id:"lotomation:temperature", max:-0.5}]},
+   on_fluid:{block:"lotomation:ice"}}]}
+```
 
 # Loot Tables
 

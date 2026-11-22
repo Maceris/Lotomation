@@ -130,29 +130,14 @@ The engine has no sea level. Fluid filling is a node, aquifer-style:
 - An overworld ocean is just a constant fluid level of 0 in data. Floating islands can have no fluid at all, or a small lake per island.
 - Where neighbouring cells disagree on level, place a solid barrier between them (Minecraft's approach).
 
-# Structures (pull model)
+# Structures and Features
 
-- **Structure set** (data): spacing per axis (the y spacing can be enormous), separation, salt, and an optional y-range restriction.
-- **Each 3D cell holds at most one structure start**, chosen with `hash(seed, salt, cellX, cellY, cellZ)`.
-- **Finding an anchor:** the placement type turns a start into a real position with a bounded, fixed-order scan that evaluates density:
-  - `floor`: solid with at least K blocks of air above it; check how flat the footprint is at a few sample points
-  - `ceiling`: the same, upside down
-  - `cave`: air with both a floor and a ceiling nearby
-  - `enclosed`: inside solid
-  - `open_air`: floating, with no ground needed
-  - `fixed`: an exact offset from the cell
-  - If no anchor is found, the cell has no structure. That's still deterministic.
-- **Generating a chunk:** find the cells whose largest possible bounding box could reach this chunk. For each, generate the layout from the structure's own seed (kept in a small LRU cache), then stamp in only the blocks inside this chunk.
-- **Loot:** see [Generation Data Format: Loot Tables](Generation%20Data%20Format.md#loot-tables).
-  - **Per-container tables** are seeded by position, `hash(seed, tableId, x, y, z)` of the container's origin block, so they don't depend on template order and work outside structures. The seed is stored when the container is placed, and the table is rolled lazily on first open.
-  - **Loot groups** spread one roll over several containers in a structure. They are seeded by `hash(seed, structureInstance, groupId)`, ordered by position relative to the structure origin, and resolved when each chunk is stamped, from the cached layout.
+Everything placed on the shaped terrain, from a single grass tuft to cities and the highways between them, is planned in [Features and Structures](Features%20and%20Structures.md). In short:
+
+- **Instances over cells:** a placement layer's candidates come from hashing its cells; a candidate that finds an anchor becomes an instance, whose layout is computed lazily, cached, and stamped into each chunk it reaches. Big layouts expand in levels (a city's districts, plots and buildings) only where a chunk needs them.
+- **Layers in order:** networks, structures, large features, small features, then a final pass (snow and ice). Each layer sees the terrain as edited by the layers above it (foundations, carving, road cuttings) and avoids their footprints, but never reads their blocks.
+- **Single blocks** such as grass tufts use `each_floor`: every floor cell rolls a hashed chance.
 - **Spawn:** the world type defines a spawn search (the same anchor types, searched around the origin) or a spawn structure.
-
-# Features (pull model)
-
-- Each feature type declares a maximum extent. A chunk checks candidate origins in its 3×3×3 neighbours (radius 16 or less) and writes only inside itself.
-- Placement modifiers: count, rarity, attachment (floor / ceiling / wall / inside solid), biome filter, condition.
-- Features read only the base terrain and exposure functions, never other features' output. Use priorities and exclusion checks against structure layouts where they interact.
 - Caves, rivers and lakes are density nodes, not carvers.
 
 # Stages
@@ -162,11 +147,11 @@ The engine has no sea level. Fluid filling is a node, aquifer-style:
 3. Terrain density: shape styles blended, then overlay styles (including noise caves, chasms and rivers)
 4. Fluids
 5. Exposure rules
-6. Structures (pulled)
+6. Networks and structures (pulled)
 7. Features (pulled)
-8. Decoration
+8. Final pass: snow and ice
 
-Stages 1–5 are pure functions you can evaluate anywhere. Stages 6–8 use the pull model.
+Stages 1-5 are pure functions you can evaluate anywhere. Stages 6-7 pull in instances from cells around the chunk, and stage 8 works on the chunk's finished blocks plus pure checks above it.
 
 # Determinism
 
@@ -204,7 +189,7 @@ Stages 1–5 are pure functions you can evaluate anywhere. Stages 6–8 use the 
 {id:"lotomation:plains",
  climate:{temperature:[F;0.53,0.85], precipitation:[F;0.0,0.3], weirdness:[F;0.0,0.3], enclosure:[F;0.0,0.4]},
  exposure:"lotomation:grassy",
- features:{ores:[T;"lotomation:copper_blob"], decoration:[T;"lotomation:tall_grass"]}}
+ tags:[T;"lotomation:grassy_biomes"]}
 ```
 
 # Issues in Current Code (Factory-Core `world.gen`, Random)
