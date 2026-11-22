@@ -100,20 +100,26 @@ The first system. Its numbers are starting points to tune by feel.
 
 - **Two kinds of message:**
   - **Reliable and ordered:** join, chunks, block changes and time.
-  - **Unreliable, newest wins:** inputs and player states.
-- **UDP, one socket**, through Netty, with a small reliability layer of our own on top, in the style of ENet or the "Gaffer on Games" articles:
-  - **Packets** carry a sequence number, the latest sequence received from the other side, and a 32-bit field of the ones before it. Acks ride on every packet, so there are no separate ack packets while traffic flows.
-  - **Reliable messages** are resent until a packet carrying them is acked, and handed over in order.
-  - **Unreliable messages** go once; a stale one (an older frame than one already handled) is dropped on arrival.
-  - **Fragments:** packets stay under about 1200 bytes. Big messages, chunks mostly, are split and put back together; a reliable message is only handed over once all its fragments are in.
-  - **Round trip** is measured from acks, smoothed, and it feeds the client's lead.
-  - **Pacing:** reliable traffic has a send budget per connection, so a burst of chunks can't crowd out inputs and states. Inputs and states always go first.
-  - **Connecting:** the client says hello, the server answers with a random token, and the client must echo it before the server keeps any state for it. This stops spoofed addresses from using the server to flood someone. A connection with no packets for a few seconds is closed.
-  - **Encoding:** per-frame messages (inputs, states) have a compact hand-written binary form, not the general request serialization.
-  - **Encryption and identity** come with the server keys in [Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md); the packet layer leaves room for them.
-- **Single player** stays in one process over the local connection, with no serialization. A simulated link can wrap either connection: `-Dikala.net.delay` (ms one way), `-Dikala.net.jitter` (most extra ms) and `-Dikala.net.loss` (share of unreliable messages lost), the same both ways. Jitter reorders unreliable messages; reliable ones are only delayed, in order. It is there so the netcode is tested without a second machine, and UDP is tested against a bad network on one.
-- **Testing the netcode in virtual time:** a client test runs the real prediction and frame clock against a stand-in server over a simulated network, so 30 s of play runs in milliseconds and every run is the same. At 80 ms each way with 20 ms jitter and 5% loss, the server misses about one input in a thousand frames once settled.
-- **A stats overlay** (the Network window in the debug toolbar) shows the round trip, the client's lead in frames, the server's buffer and target, the current dilation, misses, mispredicts and resyncs. Resends and packet loss join it with UDP.
+  - **Unreliable, newest wins:** inputs and player states. A stale one is simply ignored where it lands: the server drops inputs for frames already run, and the client ignores states older than one it has handled.
+- **UDP, one socket per end**, through Netty, with a small reliability layer of our own on top, in the style of ENet or the "Gaffer on Games" articles. It lives in Factory-Core (`networking.udp`), so the server and the client share it.
+  - **Connecting:** the client sends a hello with a random salt, padded to a full packet so the answer is never bigger than the request. The server answers with a token, an HMAC of its secret, the client's address, the salt and a 10 s time bucket, and keeps nothing yet. The client sends the token back; only then does the server make a connection, and it answers with a random connection id that every data packet carries. Lost handshake packets are sent again every 250 ms, for up to 10 s.
+  - **Data packets** stay within 1200 bytes. Each carries its sequence, whether anything has been received yet, the newest sequence received and a 32-bit field of the ones before it, then entries: unreliable messages, and fragments of reliable ones.
+  - **Acks** ride on every packet. When packets arrive and nothing goes back, an empty packet carries the acks after 10 ms, or at once after 16 packets; one also goes every 250 ms to keep the connection alive. 10 s of silence closes the connection.
+  - **Reliable messages** are split into fragments of up to 1169 bytes with consecutive ids (up to 1024 fragments a message). A fragment goes again if its packet isn't acked within one and a half round trips plus 20 ms (40 ms to 1 s). At most 1024 fragments are in flight; the receiver holds 4096 ids ahead and hands messages over whole and in order.
+  - **Unreliable messages** go once, first, in whatever packet goes next, and must fit one packet.
+  - **Pacing:** reliable fragments spend a byte budget that refills at 4 MB/s, in bursts of up to 64 KB, so a burst of chunks can't crowd out inputs and states.
+  - **Round trip:** measured from acks for the resend time. The client's frame clock keeps its own measure, from the input echo, which leaves out the server's buffer.
+  - **Encoding:** inputs and states are written by hand (a held key costs a few bytes; a state is 89); everything else is its registered id and its fields as a tree, as the stream codec writes them.
+  - **Leaving:** either end sends a disconnect three times. The server removes the player; the client stops playing.
+  - **Encryption and identity** come with the server keys in [Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md); the handshake and packets leave room for them.
+- **Hosting:** a save's `server.kvt` says whether its server listens (`listen`: `off`, `lan` or `public`), on which address (`bind`, empty for all) and port (`port`, 25640 by default). `bin/runServer <save folder>` hosts a save as a dedicated server: it listens even if the save says `off`. `-Dikala.server.port=<port>` makes any server listen, single player included, until a menu can open a world to others.
+- **Joining:** `-Dikala.connect=host[:port]` joins a server at start, until there is a multiplayer menu.
+- **Single player** stays in one process over the local connection, with no serialization.
+- **Bad networks for testing:**
+  - A simulated link can wrap the local connection: `-Dikala.net.delay` (ms one way), `-Dikala.net.jitter` (most extra ms) and `-Dikala.net.loss` (share of unreliable messages lost), the same both ways. Jitter reorders unreliable messages; reliable ones are only delayed, in order.
+  - `-Dikala.net.packetLoss` drops that share of every UDP packet each end sends, to test the reliability layer on one machine.
+- **Testing the netcode in virtual time:** a client test runs the real prediction and frame clock against a stand-in server over a simulated network, so 30 s of play runs in milliseconds and every run is the same. At 80 ms each way with 20 ms jitter and 5% loss, the server misses about one input in a thousand frames once settled. The reliability layer has its own virtual-time tests: hundreds of messages up to 200 KB arrive whole and in order at 20% loss with reordering and duplicates.
+- **A stats overlay** (the Network window in the debug toolbar) shows the round trip, the client's lead in frames, the server's buffer and target, the current dilation, misses, mispredicts and resyncs, and over UDP the packets sent and lost and the resends.
 
 # Testing
 
@@ -125,13 +131,8 @@ The first system. Its numbers are starting points to tune by feel.
 
 # Steps
 
-1. **ECS:** rewrite the EntityComponentSystem plugin from scratch: entities, component tables, ordered systems, queries, simulated and local components, snapshots and restore, with its own tests.
-2. **Frames:** the server's 16 ms frame loop beside the world tick on one thread, and the shared fixed-point simulation package (units, angle tables, integer square root) with determinism tests and the no-floating-point guard.
-3. **The pipe:** inputs and their window, the server's input buffer, `PlayerState`, and the client's ring buffers and rollback, all driving today's flying. Flying is simple, so this step tests the plumbing on its own.
-4. **Bad networks:** the simulated link, time dilation, resync and the stats overlay, tested under delay and loss.
-5. **UDP:** the packet layer (acks, resends, ordering, fragments, pacing, the connect handshake), a dedicated server that listens on it, and joining one from the client, tested over loopback with the simulated link.
-6. **Walking:** collision data in the block registry, gravity, jumping, the world view and missing-chunks-are-solid, with the movement tests.
-7. **Other players:** interpolated remote players, now that a second client can join over UDP.
+1. **Walking:** collision data in the block registry, gravity, jumping, the world view and missing-chunks-are-solid, with the movement tests.
+2. **Other players:** interpolated remote players, now that a second client can join over UDP.
 
 # Open Questions
 

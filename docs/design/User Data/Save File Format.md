@@ -44,8 +44,9 @@ Keys (binary KVT): `version`, `name`, `created` and `lastPlayed` (epoch millisec
 
 ## server.kvt
 
-- `listen`: `off` (single-player), `lan` or `public`.
-- Bind address, port, maximum players, message of the day.
+- `listen`: `off` (single-player), `lan` or `public`. A dedicated server (`bin/runServer`) listens even when this says `off`.
+- `bind`: the address to listen on, empty for every address; `port`: the UDP port, 25640 by default.
+- Maximum players and message of the day.
 - Registration policy: see [Accounts and Identity](Accounts%20and%20Identity.md#registration-policy).
 
 ## accounts.kvt
