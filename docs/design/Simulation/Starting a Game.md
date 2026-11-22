@@ -63,6 +63,12 @@ Every message is a `Request`, as today, even on a local connection.
 - **Light:** the physical sky, a sun and fog from the start.
 - **Far terrain:** full-detail sections near the player first; far LOD through `lods().fromSections()` follows once streaming works.
 
+# Time
+
+- A world's clock counts ticks from its first midnight; a day is 24,000 ticks, 20 minutes at 20 ticks a second (`WorldTime` in Factory-Core). New worlds start at 11:00 on day 0.
+- The server ticks the clock, saves it in `world.kvt` as `time` when the world closes, and sends `TimeUpdate` when a player joins and every 5 seconds. The client moves it on between updates, so the sun moves smoothly.
+- The sun rises in the east at 6, is highest at noon and sets in the west at 18, on a path leaning 30 degrees south so shadows always have some length. Its light fades out at the horizon; at night only the sky's own light is left.
+
 # Player
 
 - A player is a position, rotation and eye height. The first version only flies, like a spectator: input moves the player, and the camera follows at the eye. Walking, with gravity and block collision predicted on the client and checked by the server, comes later.
@@ -72,7 +78,7 @@ Every message is a `Request`, as today, even on a local connection.
 
 1. Server world: open a save, compile the generator, `ServerWorld` with the generation pool and tick loop, spawn search with the fallback, spawn written to `world.kvt`. Done 2026-11-21: `Server.open`, `ServerWorld`, `SpawnRule` / `SpawnFinder` / `SpawnPlatform` in Factory-Core, and the spawn in `world.kvt` as `spawn` and `spawnPlatform`. Until changed chunks are saved, a fallback platform is stamped into its chunks each time they generate.
 2. Requests and chunk streaming: join, chunk data and unload by distance, player moves. Done 2026-11-21: `Join`, `Joined`, `ChunkData`, `ChunkUnload` and `PlayerMove`; `ChunkCodec` in Factory-Core encodes chunks in the save layout; `ServerSession` and `ServerPlayer` on the server, `ClientSession` and `ClientWorld` on the client. Requests a side receives run on its own thread: the server's tick thread, the client's main thread. The flying camera is the player's eye, and its position is sent every 100 ms when it moves. A new world's 2,601 chunks in view reach the client in about 5 seconds.
-3. Client drawing: the shared chunk-to-section code, colored cubes and water, sky and sun, the camera following a flying player.
+3. Client drawing: the shared chunk-to-section code, colored cubes and water, sky and sun, the camera following a flying player. Done 2026-11-21: `ChunkSections` and `BlockMeshes` moved to a shared `render` package; `WorldRenderer` turns chunks into sections on a worker thread and redoes a chunk's neighbors when it arrives. Blocks whose names match Graphics' test blocks (stone, dirt, grass, water, planks, leaves, glass) use its procedural pixel art; others are cubes in a color from their name. `SkyLight` uses the physical sky and auto exposure, and moves the sun by the world's clock.
 4. Block looks: look files and the first textures (see [Block Looks](../Rendering/Block%20Looks.md)).
 5. Far LOD.
 6. Walking.

@@ -64,7 +64,7 @@ Anything whose name is no longer registered, for example after a mod is removed,
 
 ## world.kvt
 
-- Seed and world type. Written so far: `version`, `worldType` and `seed`. A seed typed as a whole number is used as is, other text is hashed (64-bit FNV-1a), and a blank seed is random.
+- Seed and world type. Written so far: `version`, `worldType`, `seed`, `time` (the clock in ticks, see [Starting a Game](../Simulation/Starting%20a%20Game.md#time)), and `spawn` (`[I;x,y,z]`, the block a new player's feet are in) with `spawnPlatform`. A seed typed as a whole number is used as is, other text is hashed (64-bit FNV-1a), and a blank seed is random.
 - Spawn position.
 - Game time in ticks, and weather.
 - A hash of the loaded worldgen data (mod list plus files). A mismatch on load is a warning, not a refusal ([Cubic Chunk Generation](../World%20Generation/Cubic%20Chunk%20Generation.md#determinism)).
