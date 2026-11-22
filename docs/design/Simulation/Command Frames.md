@@ -16,7 +16,9 @@ How the game simulates anything that moves or acts: players now; abilities, NPCs
 - **Waiting:** the loop parks until the next deadline. Parking on Windows wakes about 2 to 3.5 ms late, so steps start that late, but deadlines stay on the clock and the rates are exact. A late server frame never starves a client, since its input has had longer to arrive. A dedicated server can set `-Dikala.server.preciseFrames=true` to park until shortly before each deadline and yield the rest, which starts frames within tens of microseconds for about a third of a core.
 - **The client runs ahead of the server.** Its frame number is the server frame that its input is meant for. It leads by half the round trip plus a small buffer. At a 160 ms round trip that is 80 ms + one 16 ms frame = 96 ms, 6 frames: one in the server's buffer and five in flight.
 - **Time dilation:** the client changes how long its frames take on the wall clock, never the step it simulates. When the server reports a starved buffer or missed inputs, client frames shrink (to about 15.2 ms) so inputs arrive faster and a buffer builds up. When the buffer is above target, client frames stretch until it shrinks back. The rate stays within about 5% of normal, so it is never noticeable.
-- **Resync:** if the client is far off (a stall, a hitch while loading), it jumps its frame number to the server's frame plus its estimated lead, instead of dilating there.
+- **Round trip:** each input message carries when the client sent it. The server echoes the newest one in its state, with how long it held it, so the client measures the network alone, whatever the frames are doing.
+- **Lead:** an answer for frame F took half a round trip to arrive, and the next input takes half a round trip to get there, so the client aims to be a round trip (in whole frames) plus the target buffer ahead of the newest frame answered.
+- **Resync:** a client more than 6 frames short of that lead, or 16 past it (a stall, a hitch while loading, or the start, before the round trip is known), jumps its frame number to the lead instead of dilating there. Frames it skips get no input, so the server leaves the player where the client has them. The bands are wide because jitter swings the lead by a frame or two between reports; dilation closes small gaps.
 
 # Determinism
 
@@ -53,11 +55,12 @@ Rollback only works if the client and server compute exactly the same result fro
 - **Input buffer:** each player has a buffer of inputs by frame. Each frame the server takes that frame's input. If none has arrived, it repeats the previous input and counts a miss.
   - Inputs for frames already run are dropped.
   - Inputs more than 32 frames ahead are dropped too. A client that runs fast (a speed hack) can't gain anything: the server still uses one input per frame.
-- **Target buffer:** one frame when healthy, rising to two or three after misses, and easing back once the link is steady.
 - **Player state:** after each frame, the server sends each player a `PlayerState`:
   - the frame number and the last input frame it used;
   - the player's full simulated state, not just their position, so a stun or a knockback reaches the client with it;
-  - buffer health: how many inputs are waiting and any misses since the last report. The client dilates time from this.
+  - buffer health: how many inputs are waiting and how many frames have run without one. The client dilates time from this;
+  - the echo: when the newest input message was sent, and how long the server has held it.
+- **Target buffer on the client:** one frame, plus one for each report with new misses (up to four), easing back a frame after every 2 s without misses.
 - **Trust:** the server takes buttons and look from the client, nothing else. Positions only ever come from the simulation.
 
 # Client Prediction
@@ -108,8 +111,9 @@ The first system. Its numbers are starting points to tune by feel.
   - **Connecting:** the client says hello, the server answers with a random token, and the client must echo it before the server keeps any state for it. This stops spoofed addresses from using the server to flood someone. A connection with no packets for a few seconds is closed.
   - **Encoding:** per-frame messages (inputs, states) have a compact hand-written binary form, not the general request serialization.
   - **Encryption and identity** come with the server keys in [Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md); the packet layer leaves room for them.
-- **Single player** stays in one process over the local connection, with no serialization. A simulated link (delay, jitter, loss and reordering, per direction, set by system properties) can wrap either connection, so the netcode is tested without a second machine, and UDP is tested against a bad network on one.
-- **A stats overlay** shows the round trip, the client's lead in frames, the server's buffer, the current dilation, misses, mispredicts, resends and packet loss.
+- **Single player** stays in one process over the local connection, with no serialization. A simulated link can wrap either connection: `-Dikala.net.delay` (ms one way), `-Dikala.net.jitter` (most extra ms) and `-Dikala.net.loss` (share of unreliable messages lost), the same both ways. Jitter reorders unreliable messages; reliable ones are only delayed, in order. It is there so the netcode is tested without a second machine, and UDP is tested against a bad network on one.
+- **Testing the netcode in virtual time:** a client test runs the real prediction and frame clock against a stand-in server over a simulated network, so 30 s of play runs in milliseconds and every run is the same. At 80 ms each way with 20 ms jitter and 5% loss, the server misses about one input in a thousand frames once settled.
+- **A stats overlay** (the Network window in the debug toolbar) shows the round trip, the client's lead in frames, the server's buffer and target, the current dilation, misses, mispredicts and resyncs. Resends and packet loss join it with UDP.
 
 # Testing
 
