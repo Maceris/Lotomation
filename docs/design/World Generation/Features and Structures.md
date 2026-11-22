@@ -88,12 +88,11 @@ Runs after every layer has stamped the chunk, so it knows the chunk's finished b
 
 # Order of Work
 
-1. **Small features:** `each_floor` grass tufts on grass, patchy by noise.
-2. **Instances and layouts:** the instance, layout cache and footprint machinery, with procedural trees as the first user.
-3. **The final pass:** snow and ice with `sky_open`, once the fill channel exists.
-4. **Terrain edits and adapting structures,** with a village as the first user.
-5. **Networks:** sites, roads and cities that expand in levels.
-6. **Worldgen Lab:** show instances, footprints and edits, with a switch for each layer and placed feature, as each step lands.
+1. **Instances and layouts:** the instance, layout cache and footprint machinery, with procedural trees as the first user.
+2. **The final pass:** snow and ice with `sky_open`, once the fill channel exists.
+3. **Terrain edits and adapting structures,** with a village as the first user.
+4. **Networks:** sites, roads and cities that expand in levels.
+5. **Worldgen Lab:** show instances, footprints and edits, with a switch for each layer and placed feature, as each step lands.
 
 # Open Questions
 

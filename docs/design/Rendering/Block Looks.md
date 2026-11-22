@@ -74,7 +74,6 @@ Many blocks aren't cubes and aren't very voxel-like either: chests, lecterns, to
 - **Ikala-Graphics:** a pixel-sharp texture option (nearest magnification, mipmapped). Until then, `BlockLooks` enlarges textures 4x on load, so linear filtering keeps them sharp.
 - **Factory-Client:** `BlockLooks` searches a list of folders, first match wins, but only Factory-Client's data folder is in it; resource packs and mods add theirs in front once they exist.
 - **Tools:** height-to-normal and mask-to-ORM, as asset editor or command line tools, and look keys for the maps they make.
-- **Worldgen decoration:** a step that places blocks in the air above the ground, such as grass tufts on grass, flowers and trees. Block rules only choose which solid block goes where, so `lotomation:grass_tuft` exists, with its model, look and texture, but no world places it yet.
 
 # Open Questions
 

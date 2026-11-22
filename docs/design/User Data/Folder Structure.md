@@ -154,16 +154,6 @@ Development runs from the repository use the real Home, as a development version
 
 # Changes This Needs
 
-Done (2026-11-21):
-
-- **Ikala-Core:** `AppPaths` resolves the install, Home, cache, log and instance folders, with `--home`, `--cache` and `--instance` (or `ikala.home`, `ikala.cache`, `ikala.instance`), the `portable` marker and `app.yml`. A `Bootstrap` entry point sets the log folder before anything logs. Plugins and libraries load from next to the jar, each plugin's shipped files are found next to its own jar, configs are layered with only the changes saved to `<home>/settings/plugins/<Plugin>/`, and the last plugin versions are in `<home>/state/plugin-versions.yml`. Each config's defaults are written beside it as `config.defaults.yml` for reference. Config files the old code had copied into the Asset Editor's and GamePlayground's install folders were moved into their Homes, keeping only what differed from the defaults. Dependencies can also give version bounds ([Mods](Mods.md#declaring-a-mod) needs these).
-- **Ikala-Graphics:** the LOD and shader caches have their own folders in the cache (`lod-cache-folder`, `shader-cache-folder`), the GUI layout is in `<home>/settings/gui.ini`, and IkGui's log file is in the log folder.
-- **Factory-Client:** saves are in `<home>/saves`, keys in `<home>/identity/identity.key`, and the Worldgen Lab writes to `<home>/worldgen-lab`.
-- **Asset-Converter:** asset samples go in `<home>/reports/asset-samples`.
-- **Lotomation, Ikala-Asset-Editor, GamePlayground:** `bin/` run scripts that start from the install folder and find the jar themselves, `bin/runServer`, `app.yml`, the `.gitignore` safety nets, and `last-version.txt` no longer tracked.
-
-Still to do:
-
 - **Factory-Core:** derived Ed25519 keys and host keys in place of the one RSA key pair ([Accounts and Identity](Accounts%20and%20Identity.md)).
 - **Factory-Server:** the instance's `server.kvt`, `host/`, `accounts.kvt` and `session.lock`. `bin/runServer` passes `--instance`, so its logs are already there, but every plugin still loads, just headless.
 - **Ikala-Core, for mods:** a "load after" ordering, unknown `plugin.yml` sections readable without loading classes, plugins loaded from several folders with a chosen version, and loading a set of plugins while running.

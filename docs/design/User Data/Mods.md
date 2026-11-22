@@ -111,7 +111,7 @@ The server sends its mod list with ids and versions, and the player finds and in
 
 # Changes This Needs
 
-- **Ikala-Core:** a "load after" soft ordering, plugins loaded from several folders, and choosing between installed versions. Version bounds on dependencies are done: `Factory-Core >=0.1.0 <0.2.0` in `plugin.yml`, where a soft dependency that is present with a version outside its bounds also stops the plugin loading.
+- **Ikala-Core:** a "load after" soft ordering, plugins loaded from several folders, and choosing between installed versions.
 - **Factory-Core:** the mod declaration, the three load phases, rule and look tagging in the definition APIs, canonical registry encoding and hashing, and a reset back to the defaults.
 - **Factory-Client / Factory-Server:** the mod list comparison and registry sync in the connection handshake, and loading and unloading mods around a connection.
 - Plugin unload tests should cover connect, disconnect and connect again.

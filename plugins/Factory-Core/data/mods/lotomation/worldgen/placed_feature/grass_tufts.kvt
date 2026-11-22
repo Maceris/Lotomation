@@ -1,0 +1,8 @@
+/* Grass tufts on grass, thick in patches and none between them */
+{feature:"lotomation:grass_tuft",
+ biomes:"#lotomation:grassy_biomes",
+ layer:"small",
+ placement:[N;
+  {type:"each_floor", chance:0.6},
+  {type:"condition", if:{type:"below", blocks:[T;"lotomation:grass"]}},
+  {type:"condition", if:{type:"density", density:{type:"noise", noise:"lotomation:meadows"}, min:0.1}}]}

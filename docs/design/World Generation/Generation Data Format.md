@@ -391,7 +391,9 @@ Placement modifiers:
 | `axis_range` | `axis`, `min`, `max` |
 | `condition` | any block-rule condition |
 
-- `layer` is `large` (trees, boulders) or `small` (single blocks). Within a layer, the order is by priority, then by ID.
+- `layer` is `large` (trees, boulders) or `small` (single blocks, the default). Within a layer, lower priorities go first, then by ID; a position holds the first feature that lands in it.
+- Conditions on an `each_floor` position test the open position itself: `air_above` and `air_below` are 0 there, and `below` is the block under it. `below` takes block IDs; block tags come later.
+- Biome lists in placed features take IDs and `#tags`; a biome's tags are its `tags` list.
 - A feature's maximum extent is declared or derived; the layer uses the largest to decide how far around a chunk to look.
 
 # Structures

@@ -1,0 +1,2 @@
+/* A single tuft of grass */
+{type:"block", blocks:[N;{block:"lotomation:grass_tuft", weight:1}]}

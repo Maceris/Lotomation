@@ -40,7 +40,7 @@ Everything in a save is big-endian, matching [KVT](KVT.md), and every structured
 - The mods the save needs, with versions: those running on both sides and those running on the server only. Client-only mods are never recorded. See [Mods](Mods.md#sides).
 - The list of worlds.
 
-Written so far (binary KVT, by `Saves` in Factory-Core): `version`, `name`, `created` and `lastPlayed` (epoch milliseconds), `gameVersion` (Factory-Core's), `devBuild` (true for a pre-release version) and `worlds` (folder names, the first being where players start). `save.kvt` is written last, so a save folder without it never finished being made and isn't listed.
+Keys (binary KVT): `version`, `name`, `created` and `lastPlayed` (epoch milliseconds), `gameVersion` (Factory-Core's), `devBuild` (true for a pre-release version) and `worlds` (folder names, the first being where players start). `save.kvt` is written last, so a save folder without it never finished being made and isn't listed.
 
 ## server.kvt
 
@@ -64,7 +64,7 @@ Anything whose name is no longer registered, for example after a mod is removed,
 
 ## world.kvt
 
-- Seed and world type. Written so far: `version`, `worldType`, `seed`, `time` (the clock in ticks, see [Starting a Game](../Simulation/Starting%20a%20Game.md#time)), and `spawn` (`[I;x,y,z]`, the block a new player's feet are in) with `spawnPlatform`. A seed typed as a whole number is used as is, other text is hashed (64-bit FNV-1a), and a blank seed is random.
+- Seed and world type. Keys: `version`, `worldType`, `seed`, `time` (the clock in ticks, see [Starting a Game](../Simulation/Starting%20a%20Game.md#time)), and `spawn` (`[I;x,y,z]`, the block a new player's feet are in) with `spawnPlatform`. A seed typed as a whole number is used as is, other text is hashed (64-bit FNV-1a), and a blank seed is random.
 - Spawn position.
 - Game time in ticks, and weather.
 - A hash of the loaded worldgen data (mod list plus files). A mismatch on load is a warning, not a refusal ([Cubic Chunk Generation](../World%20Generation/Cubic%20Chunk%20Generation.md#determinism)).
