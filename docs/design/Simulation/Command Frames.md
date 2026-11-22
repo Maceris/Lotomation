@@ -85,7 +85,7 @@ The first system. Its numbers are starting points to tune by feel.
 - **The player** is a 0.6 x 1.8 x 0.6 m box, with eyes at 1.62 m.
 - **Modes:**
   - **Walking:** the default.
-  - **Flying:** allowed by the server (for now, always), toggled by an input. It keeps today's free movement for building and debugging.
+  - **Flying:** allowed by the server (for now, always), toggled by an input, for building and debugging. Level flight where the keys point, turned by the yaw, with jump and sneak rising and sinking straight up and down; 10 m/s, 40 m/s sprinting. It passes through everything.
 - **Walking:**
   - accelerates toward where the keys point, relative to the yaw;
   - 4.3 m/s walking and 5.6 m/s sprinting, with ground friction and weak control in the air;
