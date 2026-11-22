@@ -1,3 +1,2 @@
 {rules:[N;
-  {if:{type:"air_above", max:3}, then:{block:"lotomation:sand"}},
-  {then:{rules:"lotomation:ores"}}]}
+  {if:{type:"air_above", max:3}, then:{block:"lotomation:sand"}}]}

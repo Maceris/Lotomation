@@ -448,7 +448,7 @@ loot_groups:[N;
  style_fade:64.0,
  fluids:"lotomation:overworld/fluids",
  structure_sets:"#lotomation:overworld_structures",
- spawn:{anchor:{type:"floor", min_air:3}, origin:[I;0,0,0], radius:4096}}
+ spawn:{anchor:{type:"floor", min_air:3}, origin:[I;0,0,0], radius:4096, y_range:[I;-64,320]}}
 ```
 
 With [terrain styles](#terrain-styles), `styles` lists them by ID (by tag once tags are supported), `fallback_style` fills in where the shape weights add up to less than 1, and `style_fade` (default 64) sets how far out of range a faded-out overlay sits. `density` is the whole terrain for world types that list no styles, and is ignored, with a warning, when they do.

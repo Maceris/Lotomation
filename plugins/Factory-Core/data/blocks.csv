@@ -4,7 +4,7 @@ lotomation,concrete,concrete,,TRUE
 lotomation,dirt,,solid,TRUE
 lotomation,glass,glass,,TRUE
 lotomation,grass,,solid,TRUE
-lotomation,oak_leaves,,"organic,flammable",TRUE
+lotomation,oak_leaves,,"organic,flammable,no_spawn",TRUE
 lotomation,oak_log,wood,,TRUE
 lotomation,steel,steel,,TRUE
 lotomation,stone,,solid,TRUE

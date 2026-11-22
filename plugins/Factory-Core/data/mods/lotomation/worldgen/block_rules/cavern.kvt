@@ -1,4 +1,2 @@
-/* Limestone on cavern floors, ores in the walls */
-{rules:[N;
-  {if:{type:"air_above", max:1}, then:{block:"lotomation:limestone_patch"}},
-  {then:{rules:"lotomation:ores"}}]}
+/* Cavern walls and floors are the world's default rock */
+{rules:[N;]}
