@@ -1,0 +1,2 @@
+/* Water in a biome without its own look: clear coastal water, a little green and silty */
+{chlorophyll:0.5F, cdom:0.03F, sediment:1.0F}
