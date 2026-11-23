@@ -13,9 +13,10 @@ A save is an instance: the whole state of one hosted game, server identity and a
   server.kvt               hosting settings
   icon.png
   host/
-    server-id              the server's permanent random id
-    host.key, host.pub     the server's identity; it moves with the save
+    server.id              the server's permanent random id, in hex
+    host.key               the server's host key pair; it moves with the save
   accounts.kvt             registered accounts
+  permissions.yml          permission groups and players' own permissions
   players/<account-id>.kvt what belongs to one player
   teams/<team-id>.kvt      what belongs to a team
   worlds/<world>/          one folder per world, such as earth
@@ -47,11 +48,17 @@ Keys (binary KVT): `version`, `name`, `created` and `lastPlayed` (epoch millisec
 - `listen`: `off` (single-player), `lan` or `public`. A dedicated server (`bin/runServer`) listens even when this says `off`.
 - `bind`: the address to listen on, empty for every address; `port`: the UDP port, 25640 by default.
 - Maximum players and message of the day.
-- Registration policy: see [Accounts and Identity](Accounts%20and%20Identity.md#registration-policy).
+- `registration`: `open`, `approval` or `invite`; see [Accounts and Identity](Accounts%20and%20Identity.md#registration-policy). Missing means `approval`, or `invite` for a dedicated server.
 
 ## accounts.kvt
 
-Each account has a random account id, a username, the public key it signs in with, a role (`owner`, `operator`, `player`), whether it is banned, and when it registered. The account id, not the username, names the player's file, so a username can change later.
+Each account has a random account id, a username, the public key it signs in with, a role (`owner`, `operator`, `player`), whether it is banned, whether it waits for an operator to accept it, and when it registered. The account id, not the username, names the player's file, so a username can change later.
+
+Keys: `version`, and `accounts`, a tree by account id, each with `username`, `publicKey` (X.509, Base64), `role`, `banned`, `pending` and `registered` (milliseconds since the epoch).
+
+## permissions.yml
+
+YAML, so operators can edit it by hand: `groups`, each with `inherits` and `permissions`, and `players` by account id, each with `name` (only to make the file readable), `groups` and `permissions`. The `default`, `operator` and `owner` groups are added when missing. See [Accounts and Identity](Accounts%20and%20Identity.md#roles-and-permissions).
 
 # Names, Not Numeric Ids
 
@@ -209,8 +216,9 @@ Players are not entities on disk; they have their own files.
 
 `players/<account-id>.kvt`:
 
-- Format version, account id, team id.
-- World, position (doubles) and rotation.
+- Format version (`version`), account id (`account`), team id.
+- World (`world`), position (`x`, `y`, `z`, doubles, the feet) and rotation (`yaw`, `pitch`, degrees).
+- Game mode (`gameMode`: `survival`, `creative` or `spectator`).
 - Inventory, equipped items, attributes such as health.
 - Currencies, and which quest rewards they have claimed.
 - Stats, cosmetics and collections.

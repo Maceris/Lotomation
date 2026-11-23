@@ -9,6 +9,8 @@ include ':Factory-Client'
 project(':Factory-Client').projectDir = new File(pluginFolder + '/Factory-Client')
 include ':Factory-Server'
 project(':Factory-Server').projectDir = new File(pluginFolder + '/Factory-Server')
+include ':Ikala-Permissions'
+project(':Ikala-Permissions').projectDir = new File(pluginFolder + '/Ikala-Permissions')
 include ':Ikala-Attributes'
 project(':Ikala-Attributes').projectDir = new File(pluginFolder + '/Ikala-Attributes')
 include ':EntityComponentSystem'

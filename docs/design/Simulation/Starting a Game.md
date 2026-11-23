@@ -71,13 +71,14 @@ Every message is a `Request`, as today, even on a local connection.
 
 # Player
 
-- A player is a position, rotation and eye height. The first version only flies, like a spectator: input moves the player, and the camera follows at the eye. Walking, with gravity and block collision predicted on the client and checked by the server, comes later.
-- The client sends `PlayerMove`; the server trusts it for now and checks it once there is movement to check.
+- A player signs in to the save's server, even in single player, where the first player becomes the save's owner ([Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md)). Their player file keeps where they were, which way they faced and their game mode, so a world opens where they left it.
+- Movement is predicted on the client and checked by the server in command frames ([Command Frames](Command%20Frames.md)). New players start in survival.
+- **Pausing:** the pause key (Escape) opens the pause menu: back to the game, Options, and Exit to Main Menu. In single player the world stops while it is open: no frames, no ticks, no clock. A world with another player connected doesn't stop, and a second player joining a paused world unpauses it.
+- **Leaving:** Exit to Main Menu closes the world on the local server, which saves the players and the clock.
 
 # Next Steps
 
 1. Far LOD.
-2. Walking.
 
 Each step is checked headless with the `-Dikala.test.script` hook.
 

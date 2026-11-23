@@ -46,7 +46,7 @@ Rollback only works if the client and server compute exactly the same result fro
 
 # Inputs
 
-- **One input per frame:** a bitmask of buttons (forward, back, left, right, jump, sprint, sneak) and the look (yaw and pitch). Ability buttons join later.
+- **One input per frame:** a bitmask of buttons (forward, back, left, right, jump, sprint, sneak, fly) and the look (yaw and pitch). Ability buttons join later. The keys behind the buttons are the player's bindings ([Game Interface](../Rendering/Game%20Interface.md#key-bindings)).
 - **Sampling:** the client samples the input once per command frame. Mouse look turns the camera at render rate, so aiming never waits for a frame. The input carries the look as it was at the moment the frame was sampled.
 - **A sliding window:** every frame, the client sends all its inputs since the last frame the server acknowledged, run-length coded (a held key costs nothing extra). A lost packet's inputs arrive with the next one, so loss rarely causes a mispredict. The window is capped at 64 frames.
 
@@ -88,14 +88,16 @@ Rollback only works if the client and server compute exactly the same result fro
 The first system. Its numbers are starting points to tune by feel.
 
 - **The player** is a 0.6 x 1.8 x 0.6 m box, with eyes at 1.62 m.
-- **Modes:**
-  - **Walking:** the default.
-  - **Flying:** allowed by the server (for now, always), toggled with F, for building and debugging. The client holds a fly button in every input while flight is on, so a lost input can't drop the player out of the air. Level flight where the keys point, turned by the yaw, with jump and sneak rising and sinking straight up and down; 10 m/s, 40 m/s sprinting. It passes through everything.
+- **Game modes** decide how a player moves. A player's game mode is a simulated component, so it rolls back and replays with their movement; only the server changes it (`/gamemode`), and it is saved in their player file.
+  - **Survival:** walks. The fly button does nothing.
+  - **Creative:** walks, and tapping jump twice within 0.3 s toggles flight. The client holds the fly button in every input while flight is on, so a lost input can't drop the player out of the air. Flight hovers when no key is held, goes where the keys point, turned by the yaw, with jump and sneak rising and sinking straight up and down, at 10 m/s, 20 m/s sprinting, and blocks stop it like walking. Coming down onto the ground ends flight, and so does leaving creative.
+  - **Spectator:** a free camera. Level flight the same way at 10 m/s, 40 m/s sprinting, through everything.
 - **Walking:**
   - accelerates toward where the keys point, relative to the yaw, closing a quarter of the gap to the wanted speed each frame on the ground and a thirty-second in the air;
   - 4.3 m/s walking and 5.6 m/s sprinting;
   - gravity of 25 m/s^2, falling at most 60 m/s, and a jump that starts at 8.3 m/s and rises a little over 1.3 m, so it clears one block but not two. Holding jump jumps again on landing.
   - Leaving flight starts a fall from rest.
+- **Health** comes to survival later; creative and spectator won't take damage.
 - **Collision:** the box sweeps through the blocks one axis at a time, y first, then x, then z, and stops flush against the first solid block. Hitting something stops the speed along that axis; landing sets the on-ground flag. A box already inside a block isn't pushed out.
 - **Later:** stepping up small heights (slabs), sneaking at ledges, swimming, ladders.
 
@@ -115,10 +117,10 @@ The first system. Its numbers are starting points to tune by feel.
   - **Encoding:** everything but the per-frame messages is its registered id and its fields as a tree, as the stream codec writes them. Those of 128 bytes or more are compressed with deflate when that makes them smaller, which is what chunks need: a join's 2,601 chunks shrink from about 2.2 MB to about 0.63 MB. The length before compression comes first and is at most 16 MiB, so a hostile peer can't make the other end inflate a few bytes into gigabytes. Inputs and states are packed by each connection, which keeps what it last sent and received to pack against:
     - Whole numbers are variable length, 7 bits a byte, and signed ones zigzag coded, so small values either way take a byte or two.
     - **Inputs** carry the first frame, the low 32 bits of the send time, the newest state the client holds, then each run's count, buttons, and the change of yaw and pitch from the run before. Held keys cost about 12 bytes; turning costs about 4 bytes a frame.
-    - **States** are written as changes from the newest state the client said it holds, which the server keeps for 64 frames, or from nothing when it has none of those: a mask of the fields that changed, then each change. The echo is the low 32 bits of the send time, widened again against the client's clock, and the hold time is in microseconds. Standing still costs about 12 bytes and walking about 13; a whole state is about 35. A state packed against one the client no longer holds can only be older than one it has, so it is dropped.
+    - **States** carry the move mode and the game mode in one field, the game mode above the low 4 bits, so changing game mode costs a byte in the next state. They are written as changes from the newest state the client said it holds, which the server keeps for 64 frames, or from nothing when it has none of those: a mask of the fields that changed, then each change. The echo is the low 32 bits of the send time, widened again against the client's clock, and the hold time is in microseconds. Standing still costs about 12 bytes and walking about 13; a whole state is about 35. A state packed against one the client no longer holds can only be older than one it has, so it is dropped.
   - **Traffic:** in play each end sends one packet a frame of about 37 bytes, about 2.4 KB/s each way, or about 4 KB/s with the IP and UDP headers. Streaming chunks costs far more while it lasts: about 0.63 MB for a join's first 2,601 chunks.
   - **Leaving:** either end sends a disconnect three times. The server removes the player; the client stops playing.
-  - **Encryption and identity** come with the server keys in [Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md); the handshake and packets leave room for them.
+  - **Identity:** after connecting, the client and server prove who they are before the player joins ([Accounts and Identity](../User%20Data/Accounts%20and%20Identity.md#signing-in)). Encryption comes later; the packets leave room for it.
 - **Hosting:** a save's `server.kvt` says whether its server listens (`listen`: `off`, `lan` or `public`), on which address (`bind`, empty for all) and port (`port`, 25640 by default). `bin/runServer <save folder>` hosts a save as a dedicated server: it listens even if the save says `off`. `-Dikala.server.port=<port>` makes any server listen, single player included, until a menu can open a world to others.
 - **Joining:** `-Dikala.connect=host[:port]` joins a server at start, until there is a multiplayer menu.
 - **Single player** stays in one process over the local connection, with no serialization.
@@ -126,7 +128,7 @@ The first system. Its numbers are starting points to tune by feel.
   - A simulated link can wrap the local connection: `-Dikala.net.delay` (ms one way), `-Dikala.net.jitter` (most extra ms) and `-Dikala.net.loss` (share of unreliable messages lost), the same both ways. Jitter reorders unreliable messages; reliable ones are only delayed, in order.
   - `-Dikala.net.packetLoss` drops that share of every UDP packet each end sends, to test the reliability layer on one machine.
 - **Testing the netcode in virtual time:** a client test runs the real prediction and frame clock against a stand-in server over a simulated network, so 30 s of play runs in milliseconds and every run is the same. At 80 ms each way with 20 ms jitter and 5% loss, the server misses about one input in a thousand frames once settled. The reliability layer has its own virtual-time tests: hundreds of messages up to 200 KB arrive whole and in order at 20% loss with reordering and duplicates.
-- **A stats overlay** (the Network window in the debug toolbar) shows the round trip, the client's lead in frames, the server's buffer and target, the current dilation, misses, mispredicts and resyncs, and over UDP the packets sent and lost, the resends and the bytes a second each way. Each connection logs its totals when it closes.
+- **A stats overlay** (the Network section of the debug overlay, F3) shows the round trip, the client's lead in frames, the server's buffer and target, the current dilation, misses, mispredicts and resyncs, and over UDP the packets sent and lost, the resends and the bytes a second each way. Each connection logs its totals when it closes.
 
 # Testing
 
