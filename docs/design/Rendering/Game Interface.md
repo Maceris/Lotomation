@@ -25,9 +25,10 @@ Lotomation's actions:
 | Interface | Pause menu | Escape |
 | Interface | Open chat | T, and Enter as a second action |
 | Interface | Open chat with a command | / |
+| Interface | Free the mouse (hold) | Left Alt |
 | Debug | Debug overlay (Ikala-Graphics) | F3 |
 
-Turning the camera with the mouse isn't an action yet.
+- **The mouse looks around while playing:** the cursor is hidden and held in the window, the camera turns as it moves, and the GUI ignores it, so nothing behind it gets hovered or clicked. Opening a menu or the chat lets it go, and so does holding the free-mouse key, to click the debug overlay or a tool window. Mouse buttons bound to actions still work while it is held.
 
 # Menus
 
