@@ -1,0 +1,4 @@
+# 2% head on, as water reflects
+transparency: translucent
+roughness: 0.05
+specular: 0.25

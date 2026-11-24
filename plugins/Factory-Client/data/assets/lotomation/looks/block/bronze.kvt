@@ -1,1 +1,1 @@
-{model:"lotomation:block/cube", textures:{all:"lotomation:block/bronze"}, roughness:0.4F, metallic:1.0F}
+{model:"lotomation:block/cube_all", texture:"lotomation:block/bronze", material:"lotomation:block/bronze"}

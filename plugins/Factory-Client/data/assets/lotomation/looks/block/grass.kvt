@@ -1,1 +1,1 @@
-{model:"lotomation:block/cube", textures:{top:"lotomation:block/grass_top", side:"lotomation:block/grass_side", bottom:"lotomation:block/dirt"}, roughness:0.9F}
+{model:"lotomation:block/cube_bottom_top", texture:"lotomation:block/grass", material:"lotomation:block/grass"}

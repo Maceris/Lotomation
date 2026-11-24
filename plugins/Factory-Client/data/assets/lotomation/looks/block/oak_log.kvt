@@ -1,1 +1,1 @@
-{model:"lotomation:block/cube", textures:{side:"lotomation:block/oak_log", top:"lotomation:block/oak_log_top", bottom:"lotomation:block/oak_log_top"}, roughness:0.85F}
+{model:"lotomation:block/cube_column", texture:"lotomation:block/oak_log", material:"lotomation:block/oak_log"}

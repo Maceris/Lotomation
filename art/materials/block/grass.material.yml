@@ -1,0 +1,4 @@
+# A flat face standing in for a mat of blades, which shade most of its reflection
+roughness: 1
+specular: 0.35
+subsurface: 0.3

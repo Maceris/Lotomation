@@ -1,1 +1,1 @@
-{model:"lotomation:block/cube", textures:{all:"lotomation:block/oak_leaves"}, roughness:0.7F, transparency:"cutout"}
+{model:"lotomation:block/cube_all", texture:"lotomation:block/oak_leaves", material:"lotomation:block/oak_leaves"}

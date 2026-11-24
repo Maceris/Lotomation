@@ -1,1 +1,1 @@
-{model:"lotomation:block/cube", textures:{all:"lotomation:block/sand"}, roughness:0.95F}
+{model:"lotomation:block/cube_all", texture:"lotomation:block/sand", material:"lotomation:block/sand"}

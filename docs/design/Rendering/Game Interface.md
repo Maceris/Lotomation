@@ -53,6 +53,7 @@ Lotomation's actions:
 | `/op <player>`, `/deop <player>` | Makes an account an operator or a player again; the owner keeps their role |
 | `/accept <player>` | Lets in a player waiting for approval |
 | `/say <message>` | Speaks to everyone as the server |
+| `/time`, `/time set <time>`, `/time add <length>` | Shows the day and time, sets the time of day keeping the day (`sunrise`, `morning`, `noon`, `sunset`, `night`, `midnight`, a 24-hour `HH:MM` or an hour like `6.5`), or moves the clock by ticks, hours (`3h`) or days (`2d`), which also moves the moon's phase |
 
 A dedicated server's console runs the same commands without the `/` (except help, which is the console's own), with every permission.
 

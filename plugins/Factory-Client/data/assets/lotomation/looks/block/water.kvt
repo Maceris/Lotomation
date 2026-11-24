@@ -1,1 +1,1 @@
-{model:"fluid", textures:{all:"lotomation:block/water"}, roughness:0.05F}
+{model:"fluid", texture:"lotomation:block/water", material:"lotomation:block/water"}
