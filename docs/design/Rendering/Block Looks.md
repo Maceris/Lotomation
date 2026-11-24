@@ -16,12 +16,12 @@ How blocks look: art direction, the files a block's look is made of, and how tho
 
 # Files
 
-Looks live in the namespaced asset layout ([Resource Packs](../User%20Data/Resource%20Packs.md#format)). The base game's are in Factory-Client's data folder, since only the client reads them:
+Looks live in a plugin's content folder ([Mods: Content Folders](../User%20Data/Mods.md#content-folders)) beside the block they belong to. The base game's are in the Lotomation plugin's, and only the client reads them:
 
 ```
-plugins/Factory-Client/data/assets/lotomation/
+plugins/Lotomation/data/
   looks/block/<id>.kvt          what a block looks like: its model, texture and material
-  materials/block/<name>.ika    how a surface reflects light (see Materials), shared by any blocks
+  render_materials/block/<name>.ika    how a surface reflects light (see Materials), shared by any blocks
   textures/block/<name>.png     base color in 16x16 tiles, sRGB, alpha for cut-out or see-through pixels
   textures/block/<name>.normal.png     tangent-space normals, green up, laid out like the texture
   textures/block/<name>.orm.png        optional: occlusion, roughness, metallic
@@ -40,7 +40,7 @@ Text KVT, like the worldgen data. A look names three pieces and holds no values 
 ```
 
 - **Models:** a namespaced model name, a path under the namespace's `models` folder such as `lotomation:block/cube_all` (the default), or `fluid`, which the renderer's water system draws instead of a block mesh (see [Water](Water.md)). A model file that is missing or broken is logged and drawn as a cube.
-- **Names** are namespaced paths under the namespace's `models`, `textures` or `materials` folder, without the extension; with no namespace, `lotomation`.
+- **Names** are namespaced paths under the `models`, `textures` or `render_materials` folder of the plugin the namespace names, without the extension; with no namespace, `lotomation`. Another plugin's `overrides/<namespace>/` wins over the plugin's own file.
 - **The texture is the base color**, under the material's values. A block with no material is a matte non-metal (roughness 0.85, specular 0.5), see-through if it is a fluid; a material that is missing or broken is logged and drawn the same way.
 - A block with no look file is drawn as a cube in a color picked from its name, so new blocks are never invisible.
 
@@ -48,11 +48,11 @@ Text KVT, like the worldgen data. A look names three pieces and holds no values 
 
 A material is how a surface reflects light, on its own so many blocks can share one. The game loads it as an `.ika` file holding one `MATL` section, a fixed record it copies straight into the GPU's material table; people edit it as text, or in the asset editor.
 
-- **Sources** live in the repo under `art/materials/block/<name>.material.yml`, and the game's files are made from them with the asset editor's converter, which turns each file into its other form beside it, or to a named file:
+- **Sources** live in the repo under `art/render_materials/block/<name>.material.yml`, and the game's files are made from them with the asset editor's converter, which turns each file into its other form beside it, or to a named file:
 
 ```
-../Ikala-Asset-Editor/bin/convertAsset art/materials/block/grass.material.yml -o plugins/Factory-Client/data/assets/lotomation/materials/block/grass.ika
-../Ikala-Asset-Editor/bin/convertAsset plugins/Factory-Client/data/assets/lotomation/materials/block/grass.ika    (writes grass.material.yml beside it)
+../Ikala-Asset-Editor/bin/convertAsset art/render_materials/block/grass.material.yml -o plugins/Lotomation/data/render_materials/block/grass.ika
+../Ikala-Asset-Editor/bin/convertAsset plugins/Lotomation/data/render_materials/block/grass.ika    (writes grass.material.yml beside it)
 ```
 
 - **In the asset editor,** the workbench's material panel opens and saves material files in either form (Open file, Save file), so a material can be tuned on any model and saved back.

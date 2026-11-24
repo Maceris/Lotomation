@@ -32,7 +32,7 @@ The base game is split the same way a mod with code would be: an engine and its 
 
 The same Lotomation folder serves both: the server never reads its client-only folders, and a server download may leave them out.
 
-A pack can disable Lotomation and bring its own world on the same engine. Engine tests use small content of their own, so changing the game's blocks doesn't break them; tests of the game's world, such as worldgen golden hashes, belong to Lotomation.
+A pack can disable Lotomation and bring its own world on the same engine. Engine tests use small content of their own, so changing the game's blocks doesn't break them; checks of the game's own world belong with Lotomation.
 
 When a client and server compare mods, the base game is listed under the id `lotomation` with the game version, so a game version mismatch is reported the same way as a mod mismatch.
 
@@ -51,7 +51,7 @@ Content itself (blocks, recipes, worldgen) comes from the mod's data folder ([Co
 
 # Content Folders
 
-**A plugin's namespace is its name in lower case.** Names must match `[a-z][a-z0-9_-]*` once lowered, so the `Lotomation` plugin's content is `lotomation:stone`, and `Ores2`'s is `ores2:copper_ore`. A plugin has exactly one namespace, so its own content sits directly in its data folder with no namespace folder:
+**A plugin's namespace is its name in lower case.** Names must match `[a-z][a-z0-9_-]*` once lowered, so the `Lotomation` plugin's content is `lotomation:stone`, and `Ores2`'s is `ores2:copper_ore`. A plugin has exactly one namespace, so its own content sits directly in its data folder with no namespace folder. Every enabled plugin that depends on Factory-Core, directly or not, is read for content, so the engine's own data folders (Graphics' shaders, say) never are:
 
 ```
 plugins/<Plugin>/data/
@@ -159,8 +159,7 @@ The server sends its mod list with ids and versions, and the player finds and in
 
 # Changes This Needs
 
-- **Ikala-Core:** a "load after" soft ordering, plugins loaded from several folders, choosing between installed versions, and plugins with no main class, which only bring a data folder.
-- **Factory-Core:** the mod declaration, the content loader reading every plugin's content folder, the three load phases, rule and look tagging in the definition APIs, canonical registry encoding and hashing, a reset back to the defaults, and comparing content on reload.
-- **Lotomation:** a `Lotomation` content plugin. Factory-Core's `data/` (`blocks.csv`, `items.csv`, `tags.yml`, `materials.yml`, `mods/lotomation/worldgen/`) and Factory-Client's `data/assets/lotomation/` move into it as one file per entry, with `materials/` for render materials renamed `render_materials/`. Factory-Client's unused `data/models/` and `data/textures/` go. [Block Looks](../Rendering/Block%20Looks.md), [Water](../Rendering/Water.md), [Command Frames](../Simulation/Command%20Frames.md) and [Generation Data Format](../World%20Generation/Generation%20Data%20Format.md) describe the current files and change with them. The worldgen golden-hash tests move with the content.
+- **Ikala-Core:** a "load after" soft ordering beyond `soft-dependencies`, plugins loaded from several folders, and choosing between installed versions.
+- **Factory-Core:** the mod declaration, the Edit and Freeze phases as their own steps, rule and look tagging in the definition APIs, canonical registry encoding and hashing, a reset back to the defaults, and comparing content on reload.
 - **Factory-Client / Factory-Server:** the mod list comparison and registry sync in the connection handshake, and loading and unloading mods around a connection.
 - Plugin unload tests should cover connect, disconnect and connect again.

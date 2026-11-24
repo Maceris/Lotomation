@@ -1,0 +1,2 @@
+/* Contains liquids. Like a bucket, flask. */
+{parent:"container"}

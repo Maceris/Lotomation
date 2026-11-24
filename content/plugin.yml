@@ -1,0 +1,7 @@
+---
+name: Lotomation
+version: 0.0.1-alpha
+description: The base game's content, in plugins/Lotomation/data. It has no code.
+authors: [maceris]
+dependencies:
+  - Factory-Core

@@ -11,7 +11,7 @@ Guiding rule: **the types are fixed in code, the configurations are data.** Ever
 # File Conventions
 
 - Files are KVT string format, with one object per file.
-- **The ID comes from the path.** `mods/<mod>/worldgen/<kind>/<path>.kvt` gets the ID `<mod>:<path>`. For example, `mods/lotomation/worldgen/density/overworld/terrain.kvt` → `lotomation:overworld/terrain`.
+- **The ID comes from the path.** `worldgen/<kind>/<path>.kvt` in a plugin's content folder gets the ID `<namespace>:<path>`, the namespace being the plugin's name in lower case ([Mods: Content Folders](../User%20Data/Mods.md#content-folders)). For example, `plugins/Lotomation/data/worldgen/density/overworld/terrain.kvt` → `lotomation:overworld/terrain`.
 - **Wherever a value of some kind is expected, it can be given three ways:**
   - a string ID referring to another file of that kind
   - an inline object `{type:...}`

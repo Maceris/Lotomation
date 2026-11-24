@@ -80,7 +80,7 @@ Rollback only works if the client and server compute exactly the same result fro
 - **Movement reads blocks** through a view: the loaded world on the server, the received chunks on the client.
 - **Missing chunks are solid**, on both sides: chunks the server hasn't sent to this player yet, and chunks the client hasn't received. This keeps the two sides agreeing at the edge of the loaded area. A player at that edge stops instead of falling into the void.
 - **Block changes aren't predicted at first.** When a block changes, the client sees it when the server's change arrives, and any mispredict it causes is corrected the usual way. Placing and breaking blocks will later be predicted through the same frames.
-- **Collision is shared data, not looks.** Each block declares its collision in the `collision` column of `blocks.csv`: `full` or `none` (tufts, fluids). A name the loader doesn't know is `full`, and so is a block the definitions don't name, so nothing unknown can be walked through. Boxes on the 1/16 m grid come later, for slabs, posts and the like.
+- **Collision is shared data, not looks.** Each block declares its `collision` in its definition file (`blocks/<id>.kvt`): `full`, the default, or `none` (tufts, fluids). A name the loader doesn't know is `full`, and so is a block the definitions don't name, so nothing unknown can be walked through. Boxes on the 1/16 m grid come later, for slabs, posts and the like.
 - **The client reads its own copy of the block definitions** for collision, the same data the server reads. When mods can differ between the two, the server sends its definitions when a player joins.
 
 # Movement

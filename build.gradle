@@ -23,8 +23,21 @@ tasks.register('copyLibraries', Sync) {
 	into 'libs'
 }
 
+// The base game's content is the Lotomation plugin: a jar holding only its plugin.yml, with no
+// code, and the plugins/Lotomation/data folder beside it
+tasks.register('contentPlugin', Jar) {
+	archiveBaseName = 'Lotomation'
+	archiveVersion = '0.0.1-alpha'
+	from('content') {
+		include 'plugin.yml'
+	}
+	destinationDirectory = file('plugins')
+	// copyFramework writes into this folder, which holds content/, so keep the two apart
+	mustRunAfter copyFramework
+}
+
 tasks.register('build') {
-	dependsOn copyPlugins, copyFramework, copyLibraries
+	dependsOn copyPlugins, copyFramework, copyLibraries, contentPlugin
 }
 
 tasks.register('clean', Delete) {

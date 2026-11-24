@@ -30,8 +30,8 @@ The two halves are chosen differently:
 - **Optics come from the biome,** in client look data, one body per tile: the biome most of the tile's surface is in. Chunks already carry their biomes (4^3 cells), so the client picks a tile's optics without the generator. Where tiles differ, the renderer blends them, so the game keeps one body per tile and doesn't blend itself. A biome without a look uses `lotomation:default`, clear coastal water.
 
 ```
-/* assets/lotomation/looks/water/ocean.kvt */  {chlorophyll:0.05F, cdom:0.01F, sediment:0.0F}
-/* assets/lotomation/looks/water/river.kvt */  {chlorophyll:1.0F, cdom:0.5F, sediment:40.0F, fetch:200.0F}
+/* plugins/Lotomation/data/looks/water/ocean.kvt */  {chlorophyll:0.05F, cdom:0.01F, sediment:0.0F}
+/* plugins/Lotomation/data/looks/water/river.kvt */  {chlorophyll:1.0F, cdom:0.5F, sediment:40.0F, fetch:200.0F}
 ```
 
 `fetch` is in meters; leaving it out means the open sea.

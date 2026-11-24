@@ -1,0 +1,2 @@
+/* Contains solids. Like a bag, box. */
+{parent:"container"}
