@@ -1,7 +1,6 @@
 ---
 status: idea
 ---
-
 # Tech Branch
 
 The technology track: tiers T1 to T11, from the Stone Age to the Fusion Age, and the systems that run through them. It runs in parallel with the [Magic Branch](Magic%20Branch.md) after Arrival, and both lead into the combined tiers in [Tiers](Tiers.md). Nothing here is decided.
