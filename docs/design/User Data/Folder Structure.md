@@ -40,11 +40,11 @@ Lotomation/
     <Plugin>/config/             tracked: shipped defaults only
     <Plugin>/data/               tracked, binaries in LFS
     <Plugin>/scripts/            tracked
-    Factory-Core/data/mods/lotomation/   tracked: the base game's content
+    Lotomation/data/             tracked: the base game's content
   test-data/                     tracked (LFS): small saves and test keys for tests, never real ones
 ```
 
-- The base game's content stays in Factory-Core's data folder. The base game is the Factory plugins plus this content, not a separate mod (see [Mods](Mods.md#the-base-game)). The `mods/<mod>/` layout inside it is the content namespace the worldgen data already uses ([Generation Data Format](../World%20Generation/Generation%20Data%20Format.md)).
+- The base game's content is the `Lotomation` plugin: a jar with no code, and this data folder, laid out as in [Mods: Content Folders](Mods.md#content-folders). The Factory plugins are the engine and ship no content (see [Mods](Mods.md#the-base-game)).
 - Run scripts move into `bin/`, and `runServer` is added. They pass no Home override: development builds use the real Home folder and are treated as a development version of the game (see [Development Builds](#development-builds)).
 
 ## What Git Ignores
@@ -130,7 +130,7 @@ An instance is a save folder: `<home>/saves/<folder>/` for ones the client manag
 
 - Each instance keeps its own `logs/`, so servers running at the same time never write to the same files.
 - A `session.lock` file stops two processes from opening the same instance.
-- Server-only plugins and mods for one instance go in its `plugins/` folder (see [Mods](Mods.md#sides)).
+- Plugins and mods for one instance only go in its `plugins/` folder, such as a modpack server's mods or a server-only admin plugin (see [Mods](Mods.md#installing-and-removing)).
 
 # Caches
 

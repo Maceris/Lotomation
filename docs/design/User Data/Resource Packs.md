@@ -14,14 +14,15 @@ A pack is a folder or a zip in `<home>/resourcepacks/<pack>/`:
 <pack>/
   pack.kvt        id, version, description, the game and mod versions it targets
   icon.png
-  assets/<namespace>/
+  <namespace>/
     textures/
     models/
+    render_materials/
     sounds/
     fonts/
 ```
 
-Mods keep their own assets in their plugin's `data/` folder in the same namespaced layout, and so does the base game, so one lookup serves all of them.
+A pack only replaces other namespaces' files, so it is laid out like a plugin's `overrides/` folder ([Mods: Content Folders](Mods.md#content-folders)), and one lookup serves packs, mods and the base game.
 
 # What a Pack Can Change
 

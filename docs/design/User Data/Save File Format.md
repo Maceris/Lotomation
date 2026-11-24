@@ -66,7 +66,7 @@ Saves refer to blocks, items, entities, biomes and block entity types by their n
 
 ## Removed Content
 
-Anything whose name is no longer registered, for example after a mod is removed, loads as a placeholder that keeps its name and data, and is written back unchanged. That covers palette entries, block entities, entities, items and mod sections. Adding the mod back restores everything as it was. A server command purges placeholders for good when the owner wants them gone.
+Anything whose name is no longer registered, for example after a mod is removed, loads as a placeholder that keeps its name and data, and is written back unchanged. That covers palette entries, block entities, entities, items and mod sections. Adding the mod back restores everything as it was. A server command purges placeholders for good when the owner wants them gone, or replaces them with something else, such as one mod's copper ore with another's. Chunks store a palette of names, so replacing a block rewrites palette entries without touching block data.
 
 # Worlds
 
