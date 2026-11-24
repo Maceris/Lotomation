@@ -19,10 +19,10 @@ Nothing here is decided. Each entry says what it is, where it comes from, how it
 | Daily rewards              | Parody + defang            | The login calendar never resets, it just waits for you. See [Patient Login Calendar](#patient-login-calendar).       |
 | Grinding                   | Automate                   | The grind exists so a machine can do it.                                                                             |
 | Infinite treadmill         | Accept, opt-in             | Infinite research and prestige for people who want it. The story has a real ending (the ship launches).              |
-| Wait to play               | Parody                     | Timers exist and the factory makes the skips. See [Timers and Skip Tokens](#timers-and-skip-tokens).                 |
+| Wait to play               | Parody                     | Timers exist and the factory makes the skips.                                                                        |
 | Gambling / loot boxes      | Embrace                    | The core of the parody.                                                                                              |
 | Anchoring tricks           | Parody                     | Absurd items in the shop, like the 9,999,999 currency Golden Toilet.                                                 |
-| Social pyramid scheme      | Parody                     | "Refer a Robot", see [Refer a Robot](#refer-a-robot).                                                                |
+| Social pyramid scheme      | Parody                     | "Refer a Robot" referrals.                                                                                           |
 | Social obligation / guilds | Defang                     | Shared goals that never punish absence.                                                                              |
 | Reciprocity                | Defang                     | Gifting exists, nobody is ever asked to return the favor.                                                            |
 | Invested value             | Accept                     | The player's factory is the investment, and it is never taken away.                                                  |
@@ -30,7 +30,7 @@ Nothing here is decided. Each entry says what it is, where it comes from, how it
 | Complete the collection    | Embrace                    | Big collections with satisfying set bonuses.                                                                         |
 | Variable rewards           | Embrace                    | The point of most of this doc.                                                                                       |
 | Aesthetic manipulation     | Embrace (the fanfare part) | Over-the-top dings, confetti, and rarity beams. Never the misleading-UI part.                                        |
-| Optimism / frequency bias  | Parody                     | A fake "global feed" of NPC players winning, see [Fake Global Feed](#fake-global-feed).                              |
+| Optimism / frequency bias  | Parody                     | A fake "global feed" of NPC players winning.                                                                         |
 
 ---
 
@@ -75,14 +75,14 @@ The backbone that most other mechanics plug into. Several fake currencies, in th
 - **Name ideas**: *Lotos* (Lotomation / lotto), *Hope Crystals*, *Shinies*, *Nanogems*.
 - **Parody**: Exchange rates that make no sense. A Credits-to-premium shop with bundles like *1,280 for the price of 1,000, +10% BONUS!*, with a "best value" tag on the worst value bundle.
 - **Fit**: Making it a physical item means it can go on belts, into storage, and into machines like [Auto-Puller](#auto-puller).
-- **Connects to**: [Gacha Banners](#gacha-banners), [Slot Machine](#slot-machine), [Cosmetics](#cosmetics).
+- **Connects to**: [Slot Machine](#slot-machine), [Cosmetics](#cosmetics).
 
 ## Specialty currencies
 
 - **Dust / Stardust**: from recycling duplicates, see [Duplicate Recycling](#duplicate-recycling).
 - **Event tokens**: from events, spent in event shops (events are replayable, so tokens never expire).
 - **Badge points**: from [Badges](#badges).
-- **Pachinko balls**: literal ball bearings, see [Pachinko Parlor](#pachinko-parlor).
+- **Pachinko balls**: literal ball bearings, in the [Casino District](#casino-district).
 
 ---
 
@@ -128,7 +128,7 @@ The backbone that most other mechanics plug into. Several fake currencies, in th
 - **Prizes**: Currency, boxes, cosmetics, rare materials, joke prizes (a single dirt block with a legendary beam).
 - **Automation**: A **Lever Puller** module, or the slot machine accepts belt input and outputs winnings. Redstone-like logic (Factorio-style wires from [Types of Things Summary](../Types%20of%20Things/Types%20of%20Things%20Summary.md)) can read the result and react.
 - **Variants**: Themed slots per tech age, progressive jackpots that grow as the factory runs, a "near miss" mode as a joke.
-- **Connects to**: [Casino District](#casino-district), [Superstitions](#superstitions).
+- **Connects to**: [Casino District](#casino-district).
 ## Sieving as a Loot Table
 
 - **What**: [Resource Gathering](../Prior%20Art/Resource%20Gathering.md) already suggests separating materials out of bulk matter with drop tables (Ex Nihilo sieves). Lean into the presentation: rare fractions get the gacha treatment, with a sparkle and a sound.
@@ -156,7 +156,7 @@ The backbone that most other mechanics plug into. Several fake currencies, in th
 - **Fit**: Cards could have a small effect when slotted into a "Card Binder" machine, but the main value is completion.
 - **Packs**: Bought with Credits, earned from quests, crafted from paper and ink in the factory. A pack machine and a card sorter make it automatable.
 - **Stretch**: The cards could make up a playable card game (see the TCG folder), as a minigame inside the game.
-- **Connects to**: [Gacha Banners](#gacha-banners), [Duplicate Recycling](#duplicate-recycling), [Trophy Room](#trophy-room).
+- **Connects to**: [Duplicate Recycling](#duplicate-recycling), [Trophy Room](#trophy-room).
 
 ## Collection Book
 
@@ -204,7 +204,7 @@ Taken from City of Heroes, whose badge categories map onto a factory game well:
 - **Lore**: Organic, so the teleporter can send them. Also bred or grown via the biology branch.
 - **Variants**: Vanity pets (purely cosmetic), and "buff" pets (City of Heroes) that give a tiny bonus, like a cat that naps on a furnace for +2% speed.
 - **Fit**: A big pool for gacha, drops, and breeding. Breeding pets for traits uses the same genetics system the biology branch would need anyway.
-- **Connects to**: [Gacha Banners](#gacha-banners), [Supply Drops from Home](#supply-drops-from-home), [Pet Arena](#pet-arena).
+- **Connects to**: [Supply Drops from Home](#supply-drops-from-home), [Pet Arena](#pet-arena).
 
 ## Outfits
 
@@ -215,7 +215,7 @@ Taken from City of Heroes, whose badge categories map onto a factory game well:
 
 - **What**: Skins for machines, belts, pipes, and power poles. A "Legendary Gilded Macerator" with particle effects and a unique crunch sound. Animated belts. Themed sets (steampunk, chrome, organic, "nanite corruption").
 - **Fit**: Probably the best cosmetic for this game, since players look at their machines far more than at themselves. Ties directly to decorating.
-- **Connects to**: [Gacha Banners](#gacha-banners), [Season Track](#season-track).
+- **Connects to**: [Season Track](#season-track).
 
 ## Titles
 
@@ -238,7 +238,7 @@ A Diablo Immortal "Legendary Gems" parody.
 - **Parody**: Rank 10 of a 5-star gem needs an absurd number of duplicates. In Diablo Immortal that's thousands of dollars. Here it's a long-running production line.
 - **Fit**: Per-machine upgrades fit the "grow output per block, not per area" goal in [Resource Gathering](../Prior%20Art/Resource%20Gathering.md) suggestion 6. Encourages compactness.
 - **Risk**: Must not become mandatory for balance. Bonuses stay modest, or gems are optional overclocking on top of normal upgrades.
-- **Connects to**: [Gacha Banners](#gacha-banners), [Duplicate Recycling](#duplicate-recycling), [Enhancement Upgrades](#enhancement-upgrades).
+- **Connects to**: [Duplicate Recycling](#duplicate-recycling), [Enhancement Upgrades](#enhancement-upgrades).
 
 ## Quality Rolls
 
@@ -313,7 +313,7 @@ From Albion Online's Destiny Board and RuneScape skills.
 
 - **What**: A buildable district: slot machines, pachinko, a roulette wheel, a card table, a prize counter. All powered and fed by the factory.
 - **Fit**: Decorating with a purpose. Players can design an over-the-top Las Vegas wing of the base, powered by their own machines.
-- **Connects to**: [Slot Machine](#slot-machine), [Pachinko Parlor](#pachinko-parlor), [Trophy Room](#trophy-room).
+- **Connects to**: [Slot Machine](#slot-machine), [Trophy Room](#trophy-room).
 
 ## Treasure Hunts
 
@@ -376,13 +376,13 @@ These work directly with logistics and optimization:
 
 Breaks from building, so they should stay optional:
 
-- [Fishing](#fishing), [Pet Arena](#pet-arena), [Treasure Hunts](#treasure-hunts), [Derelict Exploration](#derelict-exploration), [Nanomachine Incursions](#nanomachine-incursions), [Pachinko Parlor](#pachinko-parlor), card game minigame
+- [Fishing](#fishing), [Pet Arena](#pet-arena), [Treasure Hunts](#treasure-hunts), [Derelict Exploration](#derelict-exploration), [Casino District](#casino-district), card game minigame
 
 ## Pure flavor and parody
 
 Cheap to add and mostly jokes:
 
-- [In-Game Ads](#in-game-ads), [Limited Time Offers](#limited-time-offers), [Fake Global Feed](#fake-global-feed), [Superstitions](#superstitions), [Anchoring Shop](#anchoring-shop), [VIP Levels](#vip-levels), [Refer a Robot](#refer-a-robot), [Patient Login Calendar](#patient-login-calendar)
+- [Patient Login Calendar](#patient-login-calendar), superstitions, the anchoring shop, Refer a Robot
 
 ---
 
