@@ -18,7 +18,7 @@ Wireless, but connected behind the scenes and maybe visually.
 
 # Items
 
-Exist in inventories, belts, storage.
+Exist in inventories, belts, storage. See [Inventories](Inventories.md).
 
 - Mod ID
 - Item ID
