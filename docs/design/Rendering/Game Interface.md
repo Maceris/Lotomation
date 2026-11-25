@@ -53,6 +53,8 @@ Lotomation's actions:
 | `/op <player>`, `/deop <player>` | Makes an account an operator or a player again; the owner keeps their role |
 | `/accept <player>` | Lets in a player waiting for approval |
 | `/say <message>` | Speaks to everyone as the server |
+| `/setblock <x> <y> <z> <block>` | Changes one block; `~` is relative to you, and a block's namespace can be left out when only one block has its name. Operators only |
+| `/tick`, `/tick rate <n>`, `/tick freeze`, `/tick unfreeze`, `/tick step [ticks]`, `/tick sprint <ticks\|stop>` | Shows or changes how fast the world runs, as Minecraft's `/tick`: players keep moving while the world is slowed or frozen. Operators only; servers only allow slowing, freezing and stepping ([Command Frames: Clocks](../Simulation/Command%20Frames.md#changing-the-rate)) |
 | `/time`, `/time set <time>`, `/time add <length>` | Shows the day and time, sets the time of day keeping the day (`sunrise`, `morning`, `noon`, `sunset`, `night`, `midnight`, a 24-hour `HH:MM` or an hour like `6.5`), or moves the clock by ticks, hours (`3h`) or days (`2d`), which also moves the moon's phase |
 
 A dedicated server's console runs the same commands without the `/` (except help, which is the console's own), with every permission.

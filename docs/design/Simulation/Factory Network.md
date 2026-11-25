@@ -20,7 +20,7 @@ Machines never keep chunks loaded. A factory spread over a thousand chunks keeps
 
 # How It Runs
 
-The network simulates **discrete events** on fixed game ticks, in the spirit of Factorio, which also simulates every entity on the whole map and never unloads anything. Something costs time only when something happens to it.
+The network simulates **discrete events** on fixed game ticks (the world ticks, 20 a second of world time, which `/tick` can slow or freeze; see [Command Frames: Clocks](Command%20Frames.md#clocks)), in the spirit of Factorio, which also simulates every entity on the whole map and never unloads anything. Something costs time only when something happens to it.
 
 - **A machine schedules its own next event**, such as "this craft finishes at tick T". Between events it costs nothing.
 - **Idle machines sleep**, as [Machines](../Types%20of%20Things/Machines.md) asks: a starved or blocked machine has no event at all until something wakes it, such as an item arriving or space freeing up.
@@ -90,5 +90,4 @@ Otherwise, entities and block ticks only run near players.
 
 # Open Questions
 
-- **Tick rate:** 20 ticks a second, as in Minecraft, or 60, as in Factorio. With events it sets timing precision and the cost of what is simulated near players, so 20 is likely enough.
 - **Power shortages:** whether every machine slows down in proportion, as in Factorio, or some machines get priority.

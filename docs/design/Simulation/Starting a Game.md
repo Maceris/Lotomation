@@ -22,7 +22,7 @@ What happens between pressing Play (or Create) and flying around a generated wor
 
 - `Server.open(saveFolder)` does steps 3 and 4. `Server` today only loads registries; it gains a `ServerWorld`.
 - **`ServerWorld`** owns the loaded chunks, a generation pool and the tick loop.
-  - **Ticks:** 20 a second, on the server's own thread.
+  - **Ticks:** 20 a second of world time, on the server's own thread, scheduled onto command frames ([Command Frames: Clocks](Command%20Frames.md#clocks)).
   - **Generation:** a low-priority thread pool, nearest to a player first. `WorldGenerator` is safe on many threads. Low priority keeps the client's frames smooth, as the LOD background loading work found.
   - **Keeping chunks:** each player keeps the chunks within a radius loaded. Chunks no player needs are dropped after a grace period. Chunks nobody changed are never saved; they are regenerated from the seed.
 - Saving changed chunks to region files comes with the first block edits, not in this step.

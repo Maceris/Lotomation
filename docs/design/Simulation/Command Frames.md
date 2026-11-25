@@ -11,14 +11,73 @@ How the game simulates anything that moves or acts: players now; abilities, NPCs
 # The Frame Clock
 
 - **A command frame is 16 ms** (62.5 a second). Frames are numbered by a `long` counted from when the server opened. The simulation always steps by exactly one frame, whatever the wall clock does, and its numbers are integers per frame (see [Determinism](#determinism)).
-- **The world tick is a separate clock.** Time of day, chunk upkeep, and later block and machine simulation keep their own 20 a second. The two clocks don't line up and don't need to.
-- **One thread runs both** on the server, so the world never changes under a frame. The loop wakes for whichever clock is due next. If it falls behind, it runs frames back to back to catch up, up to a limit, then drops the backlog and logs it.
+- **Everything else runs inside frames.** Things that aren't players step in world frames, and blocks, machines and the day clock in world ticks. Both are scheduled onto command frames, so there is one timeline and every change has a frame number ([Clocks](#clocks)).
+- **One thread runs the loop** on the server, so the world never changes under a frame. If it falls behind, it runs frames back to back to catch up, up to a limit, then drops the backlog and logs it.
 - **Waiting:** the loop parks until the next deadline. Parking on Windows wakes about 2 to 3.5 ms late, so steps start that late, but deadlines stay on the clock and the rates are exact. A late server frame never starves a client, since its input has had longer to arrive. A dedicated server can set `-Dikala.server.preciseFrames=true` to park until shortly before each deadline and yield the rest, which starts frames within tens of microseconds for about a third of a core.
 - **The client runs ahead of the server.** Its frame number is the server frame that its input is meant for. It leads by half the round trip plus a small buffer. At a 160 ms round trip that is 80 ms + one 16 ms frame = 96 ms, 6 frames: one in the server's buffer and five in flight.
 - **Time dilation:** the client changes how long its frames take on the wall clock, never the step it simulates. When the server reports a starved buffer or missed inputs, client frames shrink (to about 15.2 ms) so inputs arrive faster and a buffer builds up. When the buffer is above target, client frames stretch until it shrinks back. The rate stays within about 5% of normal, so it is never noticeable.
 - **Round trip:** each input message carries when the client sent it. The server echoes the newest one in its state, with how long it held it, so the client measures the network alone, whatever the frames are doing.
 - **Lead:** an answer for frame F took half a round trip to arrive, and the next input takes half a round trip to get there, so the client aims to be a round trip (in whole frames) plus the target buffer ahead of the newest frame answered.
 - **Resync:** a client more than 6 frames short of that lead, or 16 past it (a stall, a hitch while loading, or the start, before the round trip is known), jumps its frame number to the lead instead of dilating there. Frames it skips get no input, so the server leaves the player where the client has them. The bands are wide because jitter swings the lead by a frame or two between reports; dilation closes small gaps.
+
+# Clocks
+
+**Core rule: an effect runs on the clock of whatever causes it.** A player's own movement and actions run in command frames; what they leave in the world (an arrow, a fireball, a fire) runs on the world's clocks.
+
+| Clock | Rate | What runs on it |
+| --- | --- | --- |
+| **Command frames** | 16 ms, always on the wall clock | Players: input, movement, movement abilities, casting, effects on the player (burning, poison, regeneration), direct block edits (placing, breaking, a spell that breaks a block) |
+| **World frames** | the same 16 ms step, 0 or more per command frame | Everything that moves and isn't a player: projectiles, NPCs and monsters, falling blocks, physics objects |
+| **World ticks** | 20 per second of world time, one every 3 or 4 world frames | Blocks (fire, fluids, crops, falling blocks starting), the [machine network](Factory%20Network.md), the day clock |
+
+- **Every step is the same fixed size.** A world frame is always a 16 ms step and a tick always one tick, whether a command frame runs one, two or none of them. Speeding up, slowing down or freezing the world never changes a step's size, so physics stays exact.
+- **The world clock is simulated state.** Its rate, a whole-number remainder, and the world frame and world tick counters are in every snapshot, so which world frames and ticks ran during command frame F is a pure function of the history, and replays, tests and rollback reproduce it.
+- **Scheduling:** the rate is in world ticks a second, 20 normally. Each command frame adds the rate to the remainder, and while the remainder is at least 20, runs a world frame and takes 20 off. World tick k runs in world frame `ceil(k * 25 / 8)`, which is 8 ticks in every 25 world frames: exactly 20 a second of world time.
+- **Rate changes are commands** stamped with the command frame they take effect on, like any other change, and reach clients with the world clock in their state.
+- **Command frames never slow down or stop** for the world clock. In multiplayer they can't, since inputs arrive in real time.
+- **The server's own upkeep runs on real time,** 20 times a second on the same 8-in-25 beat of command frames: sending chunks near players, dropping idle ones, and sending the time. A frozen world still streams chunks to a player walking through it.
+- **The world clock** is `WorldClock` in Factory-Core, a record kept on its own entity in the server's simulated state.
+
+## Changing the Rate
+
+`/tick` changes the world clock, as Minecraft's `/tick` does:
+
+| Command | World frames per command frame |
+| --- | --- |
+| `/tick` | none; shows the rate, the counters, and how long ticks take |
+| `/tick rate <ticks a second>` | rate / 20, so 1 or 2 at 40, and 1 every 12 or 13 frames at 5 |
+| `/tick freeze`, `/tick unfreeze` | none while frozen |
+| `/tick step <ticks>` | while frozen: 1 per command frame until that many ticks have run, then none again |
+| `/tick sprint <ticks>` | as many as fit in each command frame's spare time, until that many ticks have run |
+
+- **Operators only.** On a server only slowing down, freezing and stepping are allowed. Speeding up and sprinting are for single player: they cost the server more simulation and more block changes and entity updates to send, not more client simulation, since clients don't run world frames.
+- **Sprinting depends on the machine:** how many world frames fit in a frame depends on how fast the computer is. A replay records the world frames each command frame ran while sprinting.
+- **Seeing it:** the debug overlay's time line says when the world is frozen or not at 20 ticks a second, and `/tick` shows the counters and how long the last world tick took, so a technical player can see when a build is too heavy.
+
+## Frozen
+
+**Frozen things can be acted on, but don't act.**
+
+- **Players** keep moving, flying, casting and using movement abilities. A leap that deals damage where it lands still hits.
+- **World things** take what players do to them at once: damage takes health off, and a knockback is kept as velocity that moves them when world frames run again. They don't move, react, act or die until then.
+- **Projectiles hang** where they are. They find hits with their own step, so an arrow hits nothing while frozen, even a player walking through it, and checks again once it moves. A fireball cast while frozen hangs in front of the caster.
+- **Frozen things that block movement still block it**, such as a falling block: players' movement checks against them every frame.
+- **Blocks:** players' direct edits apply at once. What follows from them waits for world ticks: sand above a broken block falling, fire spreading, a machine noticing.
+- **Effects on players** run in command frames, so a burning player keeps burning in a frozen world.
+
+## Order Within a Frame
+
+On the server, each command frame:
+
+1. Takes each player's input, and runs the player systems: abilities, then movement.
+2. Applies players' direct effects: damage, block edits, spawning what they cast or fire.
+3. Runs the world frames due, each running the world-thing systems and then the world tick if one is due.
+4. Keeps the frame's snapshot and sends states and block changes.
+
+- **A heavy tick makes the frame late, not wrong.** The loop catches up back to back, and clients don't starve, since their inputs have had longer to arrive.
+- **Spread work across ticks, not inside one.** Machines already schedule their own events. Fire and random block ticks give each block its own schedule, so the work of a tick doesn't arrive all at once. A tick is never split across command frames: frames would see half of it.
+- **A big tick can use many threads**, such as a large explosion split by chunk region, but its block changes are applied together at its end.
+- **Generation, lighting, meshing and saving stay off the loop.** In single player the local server has its own thread and drawing has another, so world work never runs inside a drawn frame.
 
 # Determinism
 
@@ -32,16 +91,16 @@ Rollback only works if the client and server compute exactly the same result fro
   - **Overflow** can't happen in practice at these sizes. Tests run the step with `Math.*Exact` checks on.
 - **Angles** are 16-bit binary angles (65536 to a turn), in the input and in the state. Sine and cosine come from a table worked out once from the sine's power series in integer math, so even the table never touches floating point. It is within one unit of the true value everywhere.
 - **No square roots for direction:** the keys give one of eight directions, each a fixed unit vector, turned by the yaw through the table. Anything that needs a length uses an integer square root.
-- **Randomness:** a `SplittableRandom` seeded from the entity, the frame and a salt, never a shared generator.
+- **Randomness:** a `SplittableRandom` seeded from the entity, the frame and a salt, never a shared generator. Blocks seed theirs from the world seed, the world tick and the block's position, so fire spreads the same way whatever order chunks are processed in.
 - **Times as frames:** anything that lasts (a stun, a cooldown, a jump's rise) stores the frame it ends on, not a countdown in seconds. Restoring a frame's state restores everything about it.
 - **Drawing converts at the edge:** the client turns states into floating point only to draw them.
 
 # Simulated State
 
 - **Entities** (players now, NPCs later) carry simulated components: small immutable records. A player's movement component holds its position, velocity, whether it is on the ground, and its mode. Status effects and abilities will be components too: a stun with its end frame, an ability's phase and the frame the phase started, a cooldown's end frame.
-- **Systems** are pure steps that run in a fixed order each frame: apply input, then abilities, then movement. Movement is the first system.
+- **Systems** are pure steps that run in a fixed order each frame: apply input, then abilities, then movement. Movement is the first system. Each system declares its clock ([Clocks](#clocks)): player systems run once a command frame, world-thing systems once a world frame.
 - **A frame's snapshot** is every simulated component of every entity at the end of that frame. Rolling back means putting a snapshot back, so nothing needs undo logic.
-- **The server keeps about a second of history** for every entity. This isn't needed for walking. It is what lag compensation will use: when a shot or ability lands, the server rewinds the targets to the frame the attacker saw.
+- **The server keeps about a second of history** for every entity. This isn't needed for walking. It is what lag compensation uses ([Lag Compensation](#lag-compensation)).
 - **The store is the EntityComponentSystem plugin, rewritten from scratch** as a general ECS: entities are ids, each component type is stored in its own table of immutable records, systems run in a declared order, and queries walk the entities that have a set of components. On top of that it offers what rollback needs: a cheap snapshot of the simulated tables at the end of each frame (shared structure, so an unchanged component costs nothing), restoring a snapshot, and marking which component types are simulated (snapshotted and compared) and which are local (drawing, sound, UI state that is never rolled back). Nothing in it knows about networking or frames; Factory-Core drives it.
 
 # Inputs
@@ -70,18 +129,39 @@ Rollback only works if the client and server compute exactly the same result fro
 - **When a `PlayerState` for frame F arrives:**
   - If it is older than one already handled, it is ignored, since unreliable messages can arrive out of order.
   - If it equals the prediction for F, nothing changes. Frames up to F are confirmed.
-  - If it differs, that is a **mispredict:** the client takes the server's state for F, then replays its stored inputs from F+1 to now against its current world, and overwrites its predictions as it goes.
+  - If it differs, that is a **mispredict:** the client takes the server's state for F, then replays its stored inputs from F+1 to now, each frame against the blocks as they were at that frame ([Blocks in Frames](#blocks-in-frames)), and overwrites its predictions as it goes.
   - If F has already left the ring, the client takes the server's state and replays what the ring still holds.
 - **Drawing:** the camera interpolates between the last two predicted frames by how far the wall clock is into the current frame. After a mispredict, the jump between the old and new prediction fades out over about 0.1 s. The fade only affects what is drawn, never the simulation.
 - **Other players, and later NPCs,** aren't predicted. They are drawn interpolated between the server states they last received, a little in the past. Lag compensation on the server makes up for that delay.
+
+# Lag Compensation
+
+**Core rule: a server frame is final once it has run.** The server runs each frame once, in order. Its history is only ever read, never rewritten, and nothing it has done is undone: not a player's action, not a block change, not a fire.
+
+- **Hits are checked in the past and applied now.** When a shot or an ability lands, the server rewinds the targets to the frame the attacker saw, only to see whether it hit, then applies the damage in the current frame.
+- **So a player can act in the moment they were already dead on someone else's screen.** A player who fired an arrow at frame 100 and was shot by someone who saw them at frame 95, with the hit arriving at frame 104, dies at 104; the arrow fired at 100 stays. Overwatch, VALORANT and Apex Legends all work this way, and none of them re-simulate on the server.
+- **A cap on how far back:** past a round trip of about 220 ms, as in Overwatch, the server stops rewinding for that attacker and checks against the present, so they must lead their targets. Without it, a laggy attacker could kill someone well after they reached cover.
+- **Blocks are checked as they are now,** not as the attacker saw them, so a freshly placed wall always stops a shot or a spell.
+- **No exceptions for defensive abilities yet.** Whether a target's dodge or shield that was already active on the server should beat a rewound hit is left for when abilities exist.
 
 # The World in a Step
 
 - **Movement reads blocks** through a view: the loaded world on the server, the received chunks on the client.
 - **Missing chunks are solid**, on both sides: chunks the server hasn't sent to this player yet, and chunks the client hasn't received. This keeps the two sides agreeing at the edge of the loaded area. A player at that edge stops instead of falling into the void.
-- **Block changes aren't predicted at first.** When a block changes, the client sees it when the server's change arrives, and any mispredict it causes is corrected the usual way. Placing and breaking blocks will later be predicted through the same frames.
+- **Block changes reach clients when the server's change arrives,** and any mispredict they cause is corrected the usual way ([Blocks in Frames](#blocks-in-frames)).
 - **Collision is shared data, not looks.** Each block declares its `collision` in its definition file (`blocks/<id>.kvt`): `full`, the default, or `none` (tufts, fluids). A name the loader doesn't know is `full`, and so is a block the definitions don't name, so nothing unknown can be walked through. Boxes on the 1/16 m grid come later, for slabs, posts and the like.
 - **The client reads its own copy of the block definitions** for collision, the same data the server reads. When mods can differ between the two, the server sends its definitions when a player joins.
+
+## Blocks in Frames
+
+- **Every block change is stamped with the command frame it happened in**, on the server, whether a player made it or a world tick did.
+- **The client keeps an undo log** of the changes it has received or predicted, `(position, old block, new block, frame)`, for the frames its ring buffers cover. Replaying after a mispredict puts the blocks back as they were at the first replayed frame and applies each change at its own frame, so a block that appeared at frame 105 doesn't stop the replayed frames before it.
+- **This is safe because clients never simulate blocks.** They only apply changes and put them back; fire, fluids and falling blocks run on the server alone, and their results arrive as changes.
+- **A player's own placing and breaking will be predicted:** the client changes the block at once, stamped with its input's frame, and the server accepts it or sends the real block, which the client applies through the same log. Minecraft does the same with numbered acknowledgements. A spell's direct effect on blocks can be predicted the same way; what follows from it can't.
+- **The server keeps the same log** for about a second, for questions about the past.
+- **On the server,** a change copies its chunk the first time, since a generation thread may still be encoding the original, and a chunk sent while a change happened is encoded again before it goes. Changed chunks stay loaded until chunks can be saved, since generating them again would lose the change.
+- **For now,** operators change blocks with `/setblock <x> <y> <z> <block>`, where `~` is relative to them and a block's name can leave out its namespace when only one block has it.
+- **In code:** `BlockChanges` messages, one per frame stamp, and `BlockHistory` in Factory-Core: primitive arrays and a `LongIntMap` from Ikala-Core, so replaying allocates nothing.
 
 # Movement
 
@@ -141,6 +221,9 @@ The first system. Its numbers are starting points to tune by feel.
 # Steps
 
 1. **Other players:** interpolated remote players, now that a second client can join over UDP.
+2. **Predicted placing and breaking.**
+3. **World frames:** the first things that aren't players, such as projectiles, and lag compensation with its cap.
+4. **Saving changed chunks,** so they can be dropped from memory again.
 
 # Open Questions
 
