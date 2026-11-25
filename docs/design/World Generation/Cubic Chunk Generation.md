@@ -4,7 +4,7 @@ status: implemented
 
 # Cubic Chunk Generation
 
-Brainstorm for moving world generation to 16×16×16 cubic chunks, where the vertical range matches the horizontal one (32-bit int, about ±2.1 billion blocks). This replaces the column-based parts of [Old Generation](Old%20Generation.md): the bottom-up layers, the `-512..512` height range, and bedrock at the floor.
+Brainstorm for moving world generation to 16×16×16 cubic chunks, where the vertical range matches the horizontal one (32-bit int, about ±2.1 billion blocks). There are no column-based layers built from the bottom up, no fixed height range, and no bedrock floor.
 
 # Principles
 
