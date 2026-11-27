@@ -1,22 +1,66 @@
 texture graph: 1
 size: [16, 16]
-seed: 1
+seed: 9
 data: '../../../plugins/Lotomation/data'
+maps: '..'
 texture: 'block/oak_leaves'
 model: 'block/cube_all'
 nodes:
   all1:
     type: output/all
     version: 1
-    at: [320, 0]
+    at: [960, 0]
+  combine1:
+    type: channels/combine
+    version: 1
+    at: [720, 0]
+  constant1:
+    type: input/constant
+    version: 1
+    at: [720, 480]
     set:
-      height file: 'false'
-  image1:
-    type: input/image
+      value: '0.7'
+  gradient_map1:
+    type: color/gradient_map
+    version: 1
+    at: [240, 0]
+    set:
+      stops: '0:#2e4c23 1:#4a6634'
+  luminance1:
+    type: channels/luminance
+    version: 1
+    at: [720, 240]
+  split1:
+    type: channels/split
+    version: 1
+    at: [480, 0]
+  threshold1:
+    type: ops/threshold
+    version: 1
+    at: [240, 240]
+    set:
+      level: '0.28'
+  white1:
+    type: noise/white
     version: 1
     at: [0, 0]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/oak_leaves.png'
+      size: '1'
+  white2:
+    type: noise/white
+    version: 1
+    at: [0, 240]
+    set:
+      size: '1'
 links:
-  - image1.brightness > all1.height
-  - image1.color > all1.color
+  - combine1.color > all1.color
+  - constant1.value > all1.roughness
+  - gradient_map1.color > luminance1.color
+  - gradient_map1.color > split1.color
+  - luminance1.value > all1.height
+  - split1.b > combine1.b
+  - split1.g > combine1.g
+  - split1.r > combine1.r
+  - threshold1.result > combine1.a
+  - white1.value > gradient_map1.value
+  - white2.value > threshold1.value

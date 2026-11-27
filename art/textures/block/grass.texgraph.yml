@@ -1,41 +1,118 @@
 texture graph: 1
 size: [16, 16]
-seed: 1
+seed: 7
 data: '../../../plugins/Lotomation/data'
+maps: '..'
 texture: 'block/grass'
 model: 'block/cube_bottom_top'
 nodes:
+  blend1:
+    type: ops/blend
+    version: 1
+    at: [480, 240]
+  blend2:
+    type: ops/blend
+    version: 1
+    at: [720, 240]
   bottom_top1:
     type: output/bottom_top
     version: 1
-    at: [320, 0]
+    at: [1200, 0]
     set:
-      height file: 'false'
       strength: '1.2'
-  image1:
-    type: input/image
+  cells1:
+    type: coords/cells
+    version: 1
+    at: [0, 960]
+    set:
+      across: '16'
+      down: '1'
+  color1:
+    type: input/color
+    version: 1
+    at: [240, 720]
+    set:
+      color: '#8a8078'
+  constant1:
+    type: input/constant
+    version: 1
+    at: [960, 1200]
+    set:
+      value: '0.9'
+  expression1:
+    type: math/expression
+    version: 1
+    at: [240, 960]
+    set:
+      formula: 'py < 3 + floor(a * 4) ? 1 : 0'
+  gradient_map1:
+    type: color/gradient_map
+    version: 1
+    at: [240, 0]
+    set:
+      stops: '0:#3b5629 1:#4d6a37'
+  gradient_map2:
+    type: color/gradient_map
+    version: 1
+    at: [240, 240]
+    set:
+      stops: '0:#635342 1:#776551'
+  luminance1:
+    type: channels/luminance
+    version: 1
+    at: [960, 480]
+  luminance2:
+    type: channels/luminance
+    version: 1
+    at: [960, 720]
+  luminance3:
+    type: channels/luminance
+    version: 1
+    at: [960, 960]
+  threshold1:
+    type: ops/threshold
+    version: 1
+    at: [240, 480]
+    set:
+      level: '0.08'
+  white1:
+    type: noise/white
     version: 1
     at: [0, 0]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
-  image2:
-    type: input/image
+      size: '1'
+  white2:
+    type: noise/white
     version: 1
-    at: [0, 160]
+    at: [0, 240]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
-      x: '16'
-  image3:
-    type: input/image
+      size: '1'
+  white3:
+    type: noise/white
     version: 1
-    at: [0, 320]
+    at: [0, 480]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
-      x: '32'
+      size: '1'
 links:
-  - image1.brightness > bottom_top1.side_height
-  - image1.color > bottom_top1.side_color
-  - image2.brightness > bottom_top1.top_height
-  - image2.color > bottom_top1.top_color
-  - image3.brightness > bottom_top1.bottom_height
-  - image3.color > bottom_top1.bottom_color
+  - blend1.color > blend2.base
+  - blend1.color > bottom_top1.bottom_color
+  - blend1.color > luminance3.color
+  - blend2.color > bottom_top1.side_color
+  - blend2.color > luminance1.color
+  - cells1.id > expression1.a
+  - color1.color > blend1.base
+  - constant1.value > bottom_top1.bottom_roughness
+  - constant1.value > bottom_top1.side_roughness
+  - constant1.value > bottom_top1.top_roughness
+  - expression1.result > blend2.mask
+  - gradient_map1.color > blend2.top
+  - gradient_map1.color > bottom_top1.top_color
+  - gradient_map1.color > luminance2.color
+  - gradient_map2.color > blend1.top
+  - luminance1.value > bottom_top1.side_height
+  - luminance2.value > bottom_top1.top_height
+  - luminance3.value > bottom_top1.bottom_height
+  - threshold1.result > blend1.mask
+  - white1.value > gradient_map1.value
+  - white2.value > gradient_map2.value
+  - white3.value > threshold1.value

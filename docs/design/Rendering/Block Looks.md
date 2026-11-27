@@ -22,13 +22,22 @@ Looks live in a plugin's content folder ([Mods: Content Folders](../User%20Data/
 plugins/Lotomation/data/
   looks/block/<id>.kvt          what a block looks like: its model, texture and material
   render_materials/block/<name>.ika    how a surface reflects light (see Materials), shared by any blocks
-  textures/block/<name>.png     base color in 16x16 tiles, sRGB, alpha for cut-out or see-through pixels
-  textures/block/<name>.normal.png     tangent-space normals, green up, laid out like the texture
-  textures/block/<name>.orm.png        optional: occlusion, roughness, metallic
-  textures/block/<name>.emissive.png   optional
-  textures/block/<name>.height.png     optional: 16-bit height, baked by texture graphs that ask for it
+  textures/block/<name>.ika     every map of a texture, with its mip levels (see Texture Sources)
   models/block/<name>.ika       a block's mesh, exported from the asset editor (see Models)
 ```
+
+A texture file holds the base color (sRGB, in 16x16 tiles, alpha for cut-out or see-through pixels), the tangent-space normals (green up, laid out like the color), and optionally occlusion-roughness-metallic, emissive and mask maps, uncompressed. Where a pack or override has `textures/block/<name>.png` and `<name>.normal.png` but no `.ika`, the game reads those.
+
+## Texture Sources
+
+Texture sources live in `art/textures/`, which doesn't ship: texture graphs (`<name>.texgraph.yml`), the PNG maps they bake beside themselves (their `maps` setting), and hand-painted PNG maps for textures no graph makes, like machine faces. Every current block texture is made by a graph from nodes alone. `bin/buildTextures` in the editor repo builds them all: each graph bakes its PNGs, then every texture's PNG maps become one `.ika` in the data folder, leaving files whose pixels wouldn't change alone:
+
+```
+bin/buildTextures ../Lotomation/art/textures ../Lotomation/plugins/Lotomation/data/textures
+bin/buildTextures ../Lotomation/art/textures ../Lotomation/plugins/Lotomation/data/textures --uses ../Lotomation/art/textures/block/wear.texparams.yml
+```
+
+The second form bakes only the graphs that read a shared parameter file, after changing it. A test fails if a graph and the `.ika` that ships from it disagree.
 
 ## Look Files
 
@@ -88,8 +97,8 @@ The lighting is physical, so a block looks right when its base color's average, 
 | Grass block top | 0.06, 0.12, 0.03 | roughness 1, specular 0.35, subsurface 0.3 |
 | Grass tufts | 0.06, 0.12, 0.03 | roughness 0.8, subsurface 0.5, cutout |
 | Oak leaves | 0.045, 0.10, 0.025 | roughness 0.55, subsurface 0.5, cutout |
-| Oak bark | 0.10, 0.078, 0.055 | roughness 0.85 |
-| Oak end grain | 0.45, 0.28, 0.12 | roughness 0.85 |
+| Oak bark | 0.10, 0.078, 0.055 | roughness 1, specular 0.35 (0.85 read as plastic on dark bark) |
+| Oak end grain | 0.45, 0.28, 0.12 | roughness 1, specular 0.35 (one material with the bark) |
 | Bronze | 0.80, 0.58, 0.36 | roughness 0.4, metallic 1 |
 | Steel | 0.56, 0.57, 0.58 | roughness 0.3, metallic 1 |
 | Glass | tint in the texture, see-through by alpha | roughness 0.02, translucent |
@@ -100,11 +109,11 @@ The lighting is physical, so a block looks right when its base color's average, 
 
 ## Maps That Are Hard to Paint
 
-Base color is painted by hand. The other maps are hard to paint directly, so tools make them from things that are easy to paint:
+Base color comes from a graph, or for a texture no graph makes, is painted by hand. The other maps are hard to paint directly, so tools make them from things that are easy to paint:
 
-- **Texture graphs make the maps.** Each block texture has a texture graph, `art/textures/block/<name>.texgraph.yml`, edited in the asset editor's Graph panel and baked with its Bake button or with `bin/bakeTextures` in the editor repo (one graph, a folder, or everything). A graph's Output node takes base color, height, occlusion, roughness, metallic, emissive and mask for each face, and the bake writes `<name>.png`, `.normal.png`, `.height.png` (16-bit), `.orm.png`, `.emissive.png` and `.mask.png` for whichever are linked, laid out the way the look's model expects; the layout is read from the model's UVs. Maps whose pixels wouldn't change are left alone.
-- **Normals from height:** the bake makes the normal map from the height with a Sobel filter that wraps within each face's 16x16 tile, green up, after spreading the tile's heights to 0..1; see-through pixels don't count toward the height. How deep the bumps go is the Output's strength: bark 3, stone 2.5, dirt 1.6, grass 1.2, sand 1.2, concrete 0.8, metals 0.4, and glass and water none. The game finds the map by name and samples it pixel-sharp like the color, so each texel is its own small facet.
-- **Painted base color:** an Image node reads the hand-painted PNG, and the graph makes the other maps around it. Where nothing better is painted, the height is the base color's brightness (the Image node's brightness output); a grayscale height painted by hand goes into an Image node of its own. Touch up the height, not the normal, and bake again.
+- **Texture graphs make the maps.** Each block texture has a texture graph, `art/textures/block/<name>.texgraph.yml`, edited in the asset editor's Graph panel and baked with its Bake button or with `bin/buildTextures` (see Texture Sources). A graph's Output node takes base color, height, occlusion, roughness, metallic, emissive and mask for each face, and the bake writes `<name>.png`, `.normal.png`, `.height.png` (16-bit), `.orm.png`, `.emissive.png` and `.mask.png` for whichever are linked, laid out the way the look's model expects; the layout is read from the model's UVs. Maps whose pixels wouldn't change are left alone.
+- **Normals from height:** the bake makes the normal map from the height with a Sobel filter that wraps within each face's 16x16 tile, green up, after spreading the tile's heights to 0..1; see-through pixels don't count toward the height. How deep the bumps go is the Output's strength: stone 2.5, bark 1.5, dirt 1.6, grass 1.2, sand 1.2, concrete 0.8, metals 0.4, and glass and water none. The game reads the map from the texture's `.ika` and samples it pixel-sharp like the color, so each texel is its own small facet.
+- **Painted base color:** for a hand-painted texture, an Image node reads the painted PNG, and the graph makes the other maps around it. Where nothing better is painted, the height is the base color's brightness (the Image node's brightness output); a grayscale height painted by hand goes into an Image node of its own. Touch up the height, not the normal, and bake again.
 - **Roughness and metallic from a mask:** paint `<name>.mask.png`, where each color stands for a material named in the look file (for example rough stone, polished metal, glass). This may become choosing a whole material per pixel instead of writing an ORM map, since the G-buffer already holds a material index per pixel; it would also give a grass block's dirt sides dirt's material.
 
 ## Far Away

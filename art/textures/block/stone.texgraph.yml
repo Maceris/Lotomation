@@ -1,23 +1,68 @@
 texture graph: 1
 size: [16, 16]
-seed: 1
+seed: 3
 data: '../../../plugins/Lotomation/data'
+maps: '..'
 texture: 'block/stone'
 model: 'block/cube_all'
 nodes:
   all1:
     type: output/all
     version: 1
-    at: [320, 0]
+    at: [960, 0]
     set:
-      height file: 'false'
       strength: '2.5'
-  image1:
-    type: input/image
+  blend1:
+    type: ops/blend
+    version: 1
+    at: [480, 0]
+  color1:
+    type: input/color
+    version: 1
+    at: [240, 480]
+    set:
+      color: '#61615e'
+  constant1:
+    type: input/constant
+    version: 1
+    at: [720, 480]
+    set:
+      value: '0.85'
+  gradient_map1:
+    type: color/gradient_map
+    version: 1
+    at: [240, 0]
+    set:
+      stops: '0:#757572 1:#8a8a86'
+  luminance1:
+    type: channels/luminance
+    version: 1
+    at: [720, 240]
+  threshold1:
+    type: ops/threshold
+    version: 1
+    at: [240, 240]
+    set:
+      level: '0.12'
+  white1:
+    type: noise/white
     version: 1
     at: [0, 0]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/stone.png'
+      size: '1'
+  white2:
+    type: noise/white
+    version: 1
+    at: [0, 240]
+    set:
+      size: '1'
 links:
-  - image1.brightness > all1.height
-  - image1.color > all1.color
+  - blend1.color > all1.color
+  - blend1.color > luminance1.color
+  - color1.color > blend1.base
+  - constant1.value > all1.roughness
+  - gradient_map1.color > blend1.top
+  - luminance1.value > all1.height
+  - threshold1.result > blend1.mask
+  - white1.value > gradient_map1.value
+  - white2.value > threshold1.value

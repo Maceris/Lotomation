@@ -1,1 +1,3 @@
-roughness: 0.85
+# Bark is fibrous and furrowed, and dark: at roughness 0.85 its sheen read as plastic
+roughness: 1
+specular: 0.35

@@ -1,32 +1,116 @@
 texture graph: 1
 size: [16, 16]
-seed: 1
+seed: 15
 data: '../../../plugins/Lotomation/data'
+maps: '..'
 texture: 'block/oak_log'
 model: 'block/cube_column'
 nodes:
+  blend1:
+    type: ops/blend
+    version: 1
+    at: [480, 0]
+  blend2:
+    type: ops/blend
+    version: 1
+    at: [480, 720]
+  blend3:
+    type: ops/blend
+    version: 1
+    at: [720, 720]
+  cells1:
+    type: coords/cells
+    version: 1
+    at: [0, 240]
+    set:
+      across: '1'
+      down: '4'
+  color1:
+    type: input/color
+    version: 1
+    at: [240, 480]
+    set:
+      color: '#3e372f'
+  color2:
+    type: input/color
+    version: 1
+    at: [240, 960]
+    set:
+      color: '#9f825b'
   column1:
     type: output/column
     version: 1
-    at: [320, 0]
+    at: [1200, 0]
     set:
-      height file: 'false'
-      strength: '3.0'
-  image1:
-    type: input/image
+      strength: '1.5'
+  constant1:
+    type: input/constant
+    version: 1
+    at: [960, 720]
+    set:
+      value: '0.9'
+  expression1:
+    type: math/expression
+    version: 1
+    at: [240, 240]
+    set:
+      formula: '(px + floor(a * 2)) % 4 == 0 ? 1 : 0'
+  expression2:
+    type: math/expression
+    version: 1
+    at: [0, 960]
+    set:
+      formula: 'sin(sqrt((px - 7.5) ^ 2 + (py - 7.5) ^ 2) * 2.2) > 0.6 ? 1 : 0'
+  expression3:
+    type: math/expression
+    version: 1
+    at: [0, 1200]
+    set:
+      formula: 'max(abs(px - 7.5), abs(py - 7.5)) > 6.5 ? 1 : 0'
+  gradient_map1:
+    type: color/gradient_map
+    version: 1
+    at: [240, 0]
+    set:
+      stops: '0:#5a5043 1:#665a4c'
+  gradient_map2:
+    type: color/gradient_map
+    version: 1
+    at: [240, 720]
+    set:
+      stops: '0:#b59468 1:#c09e6e'
+  luminance1:
+    type: channels/luminance
+    version: 1
+    at: [960, 240]
+  luminance2:
+    type: channels/luminance
+    version: 1
+    at: [960, 480]
+  white1:
+    type: noise/white
     version: 1
     at: [0, 0]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/oak_log.png'
-  image2:
-    type: input/image
-    version: 1
-    at: [0, 160]
-    set:
-      file: '../../../plugins/Lotomation/data/textures/block/oak_log.png'
-      x: '16'
+      size: '1'
 links:
-  - image1.brightness > column1.side_height
-  - image1.color > column1.side_color
-  - image2.brightness > column1.end_height
-  - image2.color > column1.end_color
+  - blend1.color > blend3.top
+  - blend1.color > column1.side_color
+  - blend1.color > luminance1.color
+  - blend2.color > blend3.base
+  - blend3.color > column1.end_color
+  - blend3.color > luminance2.color
+  - cells1.id > expression1.a
+  - color1.color > blend1.top
+  - color2.color > blend2.top
+  - constant1.value > column1.end_roughness
+  - constant1.value > column1.side_roughness
+  - expression1.result > blend1.mask
+  - expression2.result > blend2.mask
+  - expression3.result > blend3.mask
+  - gradient_map1.color > blend1.base
+  - gradient_map2.color > blend2.base
+  - luminance1.value > column1.side_height
+  - luminance2.value > column1.end_height
+  - white1.value > gradient_map1.value
+  - white1.value > gradient_map2.value

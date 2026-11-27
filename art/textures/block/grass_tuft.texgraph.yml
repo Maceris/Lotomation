@@ -1,23 +1,85 @@
 texture graph: 1
 size: [16, 16]
-seed: 1
+seed: 25
 data: '../../../plugins/Lotomation/data'
+maps: '..'
 texture: 'block/grass_tuft'
 model: 'block/grass_tuft'
 nodes:
   all1:
     type: output/all
     version: 1
-    at: [320, 0]
+    at: [1200, 0]
     set:
-      height file: 'false'
-      strength: '1.0'
-  image1:
-    type: input/image
+      strength: '1'
+  cells1:
+    type: coords/cells
     version: 1
     at: [0, 0]
     set:
-      file: '../../../plugins/Lotomation/data/textures/block/grass_tuft.png'
+      across: '16'
+      down: '1'
+  cells2:
+    type: coords/cells
+    version: 1
+    at: [0, 240]
+    set:
+      across: '16'
+      down: '1'
+  combine1:
+    type: channels/combine
+    version: 1
+    at: [960, 0]
+  constant1:
+    type: input/constant
+    version: 1
+    at: [960, 240]
+    set:
+      value: '0.8'
+  expression1:
+    type: math/expression
+    version: 1
+    at: [240, 0]
+    set:
+      formula: '((px % 3 != 2) + (b < 0.3) > 0) * (h - py <= floor(a * 9) + 4)'
+  expression2:
+    type: math/expression
+    version: 1
+    at: [240, 240]
+    set:
+      formula: '0.75 + 0.35 * (h - py) / (floor(a * 9) + 4) + 0.08 * (c - 0.5)'
+  gradient_map1:
+    type: color/gradient_map
+    version: 1
+    at: [480, 240]
+    set:
+      stops: '0:#000000 1.2:#577a3d'
+  luminance1:
+    type: channels/luminance
+    version: 1
+    at: [960, 480]
+  split1:
+    type: channels/split
+    version: 1
+    at: [720, 240]
+  white1:
+    type: noise/white
+    version: 1
+    at: [0, 480]
+    set:
+      size: '1'
 links:
-  - image1.brightness > all1.height
-  - image1.color > all1.color
+  - cells1.id > expression1.a
+  - cells1.id > expression2.a
+  - cells2.id > expression1.b
+  - combine1.color > all1.color
+  - constant1.value > all1.roughness
+  - expression1.result > combine1.a
+  - expression2.result > gradient_map1.value
+  - gradient_map1.color > luminance1.color
+  - gradient_map1.color > split1.color
+  - luminance1.value > all1.height
+  - split1.b > combine1.b
+  - split1.g > combine1.g
+  - split1.r > combine1.r
+  - white1.value > expression2.c
