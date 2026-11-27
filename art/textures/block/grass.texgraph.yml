@@ -1,0 +1,41 @@
+texture graph: 1
+size: [16, 16]
+seed: 1
+data: '../../../plugins/Lotomation/data'
+texture: 'block/grass'
+model: 'block/cube_bottom_top'
+nodes:
+  bottom_top1:
+    type: output/bottom_top
+    version: 1
+    at: [320, 0]
+    set:
+      height file: 'false'
+      strength: '1.2'
+  image1:
+    type: input/image
+    version: 1
+    at: [0, 0]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
+  image2:
+    type: input/image
+    version: 1
+    at: [0, 160]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
+      x: '16'
+  image3:
+    type: input/image
+    version: 1
+    at: [0, 320]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/grass.png'
+      x: '32'
+links:
+  - image1.brightness > bottom_top1.side_height
+  - image1.color > bottom_top1.side_color
+  - image2.brightness > bottom_top1.top_height
+  - image2.color > bottom_top1.top_color
+  - image3.brightness > bottom_top1.bottom_height
+  - image3.color > bottom_top1.bottom_color

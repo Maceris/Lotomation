@@ -1,0 +1,23 @@
+texture graph: 1
+size: [16, 16]
+seed: 1
+data: '../../../plugins/Lotomation/data'
+texture: 'block/stone'
+model: 'block/cube_all'
+nodes:
+  all1:
+    type: output/all
+    version: 1
+    at: [320, 0]
+    set:
+      height file: 'false'
+      strength: '2.5'
+  image1:
+    type: input/image
+    version: 1
+    at: [0, 0]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/stone.png'
+links:
+  - image1.brightness > all1.height
+  - image1.color > all1.color

@@ -26,6 +26,7 @@ plugins/Lotomation/data/
   textures/block/<name>.normal.png     tangent-space normals, green up, laid out like the texture
   textures/block/<name>.orm.png        optional: occlusion, roughness, metallic
   textures/block/<name>.emissive.png   optional
+  textures/block/<name>.height.png     optional: 16-bit height, baked by texture graphs that ask for it
   models/block/<name>.ika       a block's mesh, exported from the asset editor (see Models)
 ```
 
@@ -101,7 +102,9 @@ The lighting is physical, so a block looks right when its base color's average, 
 
 Base color is painted by hand. The other maps are hard to paint directly, so tools make them from things that are easy to paint:
 
-- **Normals from height:** `./gradlew :Factory-Client:blockNormals --args="[--force] <data folder>"` writes `<name>.normal.png` beside every base color texture that lacks one. Each 16x16 tile's height is its brightness, dark crevices low, unless a hand-painted grayscale `<name>.height.png` gives it; tiles wrap within themselves, so neighboring blocks meet without a seam. How deep the bumps go is per texture, in `BlockNormals.STRENGTH`: bark 3, stone 2.5, dirt 1.6, grass 1.2, sand 1.2, concrete 0.8, metals 0.4, glass and water none. The game finds the map by name and samples it pixel-sharp like the color, so each texel is its own small facet. Touch up the height, not the normal, and write the map again with `--force`.
+- **Texture graphs make the maps.** Each block texture has a texture graph, `art/textures/block/<name>.texgraph.yml`, edited in the asset editor's Graph panel and baked with its Bake button or with `bin/bakeTextures` in the editor repo (one graph, a folder, or everything). A graph's Output node takes base color, height, occlusion, roughness, metallic, emissive and mask for each face, and the bake writes `<name>.png`, `.normal.png`, `.height.png` (16-bit), `.orm.png`, `.emissive.png` and `.mask.png` for whichever are linked, laid out the way the look's model expects; the layout is read from the model's UVs. Maps whose pixels wouldn't change are left alone.
+- **Normals from height:** the bake makes the normal map from the height with a Sobel filter that wraps within each face's 16x16 tile, green up, after spreading the tile's heights to 0..1; see-through pixels don't count toward the height. How deep the bumps go is the Output's strength: bark 3, stone 2.5, dirt 1.6, grass 1.2, sand 1.2, concrete 0.8, metals 0.4, and glass and water none. The game finds the map by name and samples it pixel-sharp like the color, so each texel is its own small facet.
+- **Painted base color:** an Image node reads the hand-painted PNG, and the graph makes the other maps around it. Where nothing better is painted, the height is the base color's brightness (the Image node's brightness output); a grayscale height painted by hand goes into an Image node of its own. Touch up the height, not the normal, and bake again.
 - **Roughness and metallic from a mask:** paint `<name>.mask.png`, where each color stands for a material named in the look file (for example rough stone, polished metal, glass). This may become choosing a whole material per pixel instead of writing an ORM map, since the G-buffer already holds a material index per pixel; it would also give a grass block's dirt sides dirt's material.
 
 ## Far Away
@@ -130,7 +133,7 @@ Many blocks aren't cubes and aren't very voxel-like either: chests, lecterns, to
 
 # Making the First Textures
 
-- **Procedural start:** `./gradlew :Factory-Client:starterTextures --args="<data folder>"` writes a PNG for every base block, 16x16 tiles laid out for its model, as a first set to repaint by hand: Graphics' test art (`benchmark/BlockTextures`) for stone, dirt, grass, leaves and water, and art drawn in the tool for the rest. It only writes missing files and never overwrites one, so painted textures are kept; to start a texture again, delete it and run the tool.
+- **Procedural start:** new textures start as texture graphs built from noise and pattern nodes, and are baked, then painted over or kept procedural. The library of starter graphs (stone, dirt, grass, leaves and water among them) comes with the texture graph editing work; Graphics keeps its own `benchmark/BlockTextures` for benchmark scenes.
 
 # Changes This Needs
 

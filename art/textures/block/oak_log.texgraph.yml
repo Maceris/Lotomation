@@ -1,0 +1,32 @@
+texture graph: 1
+size: [16, 16]
+seed: 1
+data: '../../../plugins/Lotomation/data'
+texture: 'block/oak_log'
+model: 'block/cube_column'
+nodes:
+  column1:
+    type: output/column
+    version: 1
+    at: [320, 0]
+    set:
+      height file: 'false'
+      strength: '3.0'
+  image1:
+    type: input/image
+    version: 1
+    at: [0, 0]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/oak_log.png'
+  image2:
+    type: input/image
+    version: 1
+    at: [0, 160]
+    set:
+      file: '../../../plugins/Lotomation/data/textures/block/oak_log.png'
+      x: '16'
+links:
+  - image1.brightness > column1.side_height
+  - image1.color > column1.side_color
+  - image2.brightness > column1.end_height
+  - image2.color > column1.end_color
