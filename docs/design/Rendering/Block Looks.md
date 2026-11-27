@@ -30,7 +30,7 @@ A texture file holds the base color (sRGB, in 16x16 tiles, alpha for cut-out or 
 
 ## Texture Sources
 
-Texture sources live in `art/textures/`, which doesn't ship: texture graphs (`<name>.texgraph.yml`), the PNG maps they bake beside themselves (their `maps` setting), and hand-painted PNG maps for textures no graph makes, like machine faces. Every current block texture is made by a graph from nodes alone. `bin/buildTextures` in the editor repo builds them all: each graph bakes its PNGs, then every texture's PNG maps become one `.ika` in the data folder, leaving files whose pixels wouldn't change alone:
+Texture sources live in `art/textures/`, which doesn't ship: texture graphs (`<name>.texgraph.yml`), instances that change a graph's values (`<name>.texinst.yml`), the PNG maps they bake beside themselves (their `maps` setting), and hand-painted PNG maps for textures no graph makes, like machine faces. Every current block texture is made by a graph from nodes alone. `bin/buildTextures` in the editor repo builds them all: each graph bakes its PNGs, then every texture's PNG maps become one `.ika` in the data folder, leaving files whose pixels wouldn't change alone:
 
 ```
 bin/buildTextures ../Lotomation/art/textures ../Lotomation/plugins/Lotomation/data/textures
