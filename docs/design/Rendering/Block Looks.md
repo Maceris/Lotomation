@@ -133,7 +133,7 @@ Many blocks aren't cubes and aren't very voxel-like either: chests, lecterns, to
 
 # Making the First Textures
 
-- **Procedural start:** new textures start as texture graphs built from noise and pattern nodes, and are baked, then painted over or kept procedural. The library of starter graphs (stone, dirt, grass, leaves and water among them) comes with the texture graph editing work; Graphics keeps its own `benchmark/BlockTextures` for benchmark scenes.
+- **Procedural start:** new textures start as texture graphs built from noise and pattern nodes, and are baked, then painted over or kept procedural. The asset editor's Graph panel opens one of its starter graphs (stone, dirt, grass, oak leaves, oak log, water, sand, concrete, steel, bronze, glass and a grass tuft), made from nodes alone, as a new graph to change; Graphics keeps its own `benchmark/BlockTextures` for benchmark scenes.
 
 # Changes This Needs
 
