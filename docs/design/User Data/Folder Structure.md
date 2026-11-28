@@ -140,6 +140,8 @@ An instance is a save folder: `<home>/saves/<folder>/` for ones the client manag
   shaders/                compiled SPIR-V
   registries/<hash>.kvt   rule registries synced from servers (see Mods)
   resourcepacks/<sha256>/ resource packs a server suggested and the player accepted
+  asset-index.yml         the asset editor's index of its roots (the editor only)
+  thumbnails/<key>.png    the asset editor's thumbnails, capped at 64 MiB (the editor only)
 ```
 
 - Caches are never inside a save. Saves stay small enough to copy, back up and send to someone.
